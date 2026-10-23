@@ -1,0 +1,2 @@
+/* brojevi u tablicama se ne lome u dva retka (široke tablice se pomiču vodoravno) */
+.md-typeset table:not([class]) code { white-space: nowrap; }

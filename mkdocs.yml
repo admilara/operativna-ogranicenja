@@ -1,0 +1,57 @@
+site_name: Operativna ograničenja
+site_description: Proračun operativnih ograničenja novih proizvodnih postrojenja prema Smjernicama HOPS-a za izradu EOTRP-a — pandapower
+repo_url: https://github.com/admilara/operativna-ogranicenja
+repo_name: admilara/operativna-ogranicenja
+docs_dir: docs
+
+theme:
+  name: material
+  language: hr
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - toc.follow
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: {icon: material/weather-night, name: Tamna tema}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: {icon: material/weather-sunny, name: Svijetla tema}
+
+markdown_extensions:
+  - tables
+  - toc:
+      permalink: true
+  - github-callouts          # > [!WARNING] ... radi i na GitHubu i u MkDocs
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.superfences
+  - pymdownx.details
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js
+
+nav:
+  - Početna: index.md
+  - Teorija:
+      - teorija/index.md
+      - 1. Mrežni model iz PSS/E: teorija/01-mrezni-model.md
+      - 2. PST i korekcija impedancije: teorija/02-pst-korekcija-impedancije.md
+      - 3. Granica sustava i ekvivalenti: teorija/03-granica-ekvivalenti.md
+      - 4. N-1 i opterećenje elemenata: teorija/04-n-1-opterecenje.md
+      - 5. Operativna ograničenja: teorija/05-operativna-ogranicenja.md
+      - 6. Uravnoteženje snage — tri varijante: teorija/06-uravnotezenje.md
+      - 7. Prijedlog mjera (STUM): teorija/07-mjere.md
+      - 8. Vizualizacija rezultata: teorija/08-vizualizacija.md
+      - Oznake i pojmovi: teorija/oznake.md
+      - Prilog A — PST-ovi u modelu: teorija/prilog-pst-zapisi.md
+  - Izvještaji:
+      - Obvezna napomena o uravnoteženju: izvjestaji/napomena-uravnotezenje.md
+  - Nedostaci smjernica i podataka: nedostaci-smjernica.md
+  - Otvorena pitanja: otvorena-pitanja.md
