@@ -43,7 +43,7 @@ def main():
 
     out = OUTPUT_CSV or os.path.join(_REPO, "config", "htls_ratings.csv")
     with open(out, "w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(rows[0]))
+        w = csv.DictWriter(fh, fieldnames=list(rows[0]), lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
     print("\n3. HTLS na 180 °C (najniža vrijednost preko kalibracija):")
