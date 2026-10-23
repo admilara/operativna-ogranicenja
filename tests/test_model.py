@@ -123,3 +123,21 @@ def test_json_roundtrip_keeps_ztab(model, tmp_path):
     assert net.trafo3w.at[i, "psse_zfactor"] == pytest.approx(0.79029, abs=1e-5)
     assert not math.isnan(net.trafo3w.at[i, "vk_hv_percent"])
 
+
+@needs_data
+def test_pst_report_contains_every_field_verbatim():
+    import csv as _csv
+    import io as _io
+    from oplimits.pst_report import frames
+    df = frames(RAW)["pst_zapisi"]
+    df = df[df.vrijednost.notna()]
+    lines = open(RAW, encoding="latin-1").read().splitlines()
+
+    def rec(l):
+        return [x.strip() for x in next(_csv.reader(_io.StringIO(l), quotechar="'", skipinitialspace=True))]
+
+    assert df.transformator.nunique() == 9
+    for name, g in df.groupby("transformator"):
+        i = [k for k, l in enumerate(lines) if ("'" + name) in l and not l.startswith("@!")][0]
+        n = 5 if rec(lines[i])[2] != "0" else 4
+        assert [v for ln in lines[i:i + n] for v in rec(ln)] == list(g.vrijednost), name
