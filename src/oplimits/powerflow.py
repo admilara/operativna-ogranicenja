@@ -1,7 +1,9 @@
 """Power flow with PSS/E-style reactive limits (VARLIM) and slack placement.
 
-pandapower's enforce_q_lims does not converge on these networks, so Q limits are
-enforced in an outer loop. Theory: docs/teorija/01-mrezni-model.md, section 1.3
+pandapower's enforce_q_lims switches PV->PQ only one way (PYPOWER logic); on these networks it
+either diverges or settles on a different operating point (up to 0.032 p.u. from PSS/E), so Q
+limits are enforced in an outer loop that also switches PQ->PV like PSS/E VARLIM.
+Theory: docs/teorija/01-mrezni-model.md, section 1.3
 """
 import pandapower as pp
 

@@ -10,6 +10,7 @@ Nedostatke samih smjernica i modela vidi na stranici [Nedostaci smjernica i poda
 | 4 | Podaci o spremnicima hibridnih postrojenja ($P_{BS}$, $E_{BS}$, $\eta$, $T_{ev}$) — **po projektu** | $E_{oo}$ za SE + BS | `config/hybrid_storage.csv`; dvije granice procjene (pogl. 5, §5.11) |
 | 5 | RHE Velebit u crpnom radu (nema zapisa u modelu) | granice varijante V1 | samo turbinski raspon |
 | 6 | Model susjednih sustava (za REI ekvivalent) | ispadi prekograničnih vodova, zastavice G1–G3, varijanta V3 | stalne PQ injekcije (pogl. 3) |
+| 7 | Granice jalove snage jedinice pri ograničenju djelatne snage: preračunati na novu $P_G$ (cos φ 0,95, kao u modelu) ili zadržati (prema $P_{\max}$, NC RfG) | naponi, jalova snaga i struja vodova uz korisnike | još nije odlučeno (pogl. 1, §1.3) |
 
 ## Riješeno
 
