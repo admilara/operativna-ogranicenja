@@ -51,5 +51,4 @@ tests/           testovi
 ## Podaci
 
 Mrežni modeli HOPS-a, popisi korisnika u postupku priključenja i rezultati proračuna
-**nisu dio repozitorija** i ne smiju se objaviti. `.gitignore` isključuje `data/`,
-`*.raw`, `*.sav`, `*.xlsx` i `*.pdf`.
+**nisu dio repozitorija** i ne smiju se objaviti. 
