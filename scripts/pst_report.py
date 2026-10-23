@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Doslovni ispis svih podataka koje .raw datoteka sadrži za svaki PST
-(transformator s kontrolom kuta, tablicom korekcije impedancije ili kutom različitim od nule).
+Pregled PST-ova iz .raw datoteke: osnovni podaci transformatora i tablica korekcije
+impedancije, u obliku stranice teorijske knjige (Markdown).
 
 Pokretanje: otvoriti u IDLE-u i F5. Postavke su u bloku ispod.
 Teorija: docs/teorija/prilog-pst-zapisi.md
 """
 # ============================ POSTAVKE ============================
-INPUT_RAW   = r""   # .raw datoteka; prazno -> dijalog za odabir
-OUTPUT_MD   = r""   # prazno -> <ime ulaza>_pst.md
-OUTPUT_XLSX = r""   # prazno -> <ime ulaza>_pst.xlsx
+INPUT_RAW  = r""     # .raw datoteka; prazno -> dijalog za odabir
+OUTPUT_MD  = r""     # prazno -> <ime ulaza>_pst.md
+VERBATIM   = False   # True -> doslovni ispis svih polja zapisa umjesto pregleda
 # ==================================================================
 
 import os
@@ -36,35 +36,29 @@ def _pick_file():
 
 def main():
     try:
-        import pandas as pd
-        import openpyxl  # noqa: F401
+        import pandas  # noqa: F401
     except ImportError as e:
         print("NEDOSTAJE %s u ovoj Python instalaciji:\n   %s" % (e.name, sys.executable))
         print('Instalirati s:  "%s" -m pip install %s' % (sys.executable, e.name))
         return
     from oplimits import ModelError
-    from oplimits.pst_report import markdown_report, frames
+    from oplimits.pst_report import markdown_report, readable_report
 
     src = INPUT_RAW or _pick_file()
     if not src:
         print("Nije odabrana datoteka.")
         return
-    base = os.path.splitext(src)[0]
-    out_md = OUTPUT_MD or base + "_pst.md"
-    out_xlsx = OUTPUT_XLSX or base + "_pst.xlsx"
+    out = OUTPUT_MD or os.path.splitext(src)[0] + "_pst.md"
     try:
-        md, psts, tables = markdown_report(src)
-        with open(out_md, "w", encoding="utf-8") as fh:
+        md, psts, tables = (markdown_report if VERBATIM else readable_report)(src)
+        with open(out, "w", encoding="utf-8") as fh:
             fh.write(md + "\n")
-        with pd.ExcelWriter(out_xlsx) as xw:
-            for name, df in frames(src).items():
-                df.to_excel(xw, sheet_name=name, index=False)
         print("PST-ova: %d, tablica korekcije: %d" % (len(psts), len(tables)))
-        print("Spremljeno:\n   %s\n   %s" % (out_md, out_xlsx))
+        print("Spremljeno:", out)
     except ModelError as e:
         print("GREŠKA:", e)
     except PermissionError as e:
-        print("Ne mogu spremiti (datoteka otvorena u Excelu?):", e.filename)
+        print("Ne mogu spremiti:", e.filename)
 
 
 main()

@@ -141,3 +141,12 @@ def test_pst_report_contains_every_field_verbatim():
         i = [k for k, l in enumerate(lines) if ("'" + name) in l and not l.startswith("@!")][0]
         n = 5 if rec(lines[i])[2] != "0" else 4
         assert [v for ln in lines[i:i + n] for v in rec(ln)] == list(g.vrijednost), name
+
+
+@needs_data
+def test_pst_readable_report_groups_by_table():
+    from oplimits.pst_report import readable_report
+    md, psts, tables = readable_report(RAW)
+    assert md.count("### Tablica korekcije impedancije") == 4
+    assert "## Konjsko i Melina — tablica korekcije 4" in md
+    assert "6,52" in md          # Konjsko u_k12 at 5.5 deg, theory chapter 2.4

@@ -242,3 +242,204 @@ def frames(path):
                 rows.append(dict(transformator=_name(r), dio=part, polje=f, vrijednost=v))
     zt = [dict(tablica=t, tocka=i + 1, T=p[0], ReF=p[1], ImF=p[2]) for t, pts in tables.items() for i, p in enumerate(pts)]
     return {"pst_zapisi": pd.DataFrame(rows), "tablice_korekcije": pd.DataFrame(zt)}
+
+
+# ----------------------------------------------------------------------------------------
+# Readable page: basic data per station + impedance table per correction table
+# ----------------------------------------------------------------------------------------
+STATIONS = {"GRACAC": "Gračac", "KONJS": "Konjsko", "MELIN": "Melina", "HE SE": "Senj", "ZERJA": "Žerjavinec"}
+# guidelines, Table 3
+TABLE3_RANGE = {"Gračac": "±30°", "Senj": "−6,3° do +10,54°", "Žerjavinec": "−4,48° do +6,76°",
+                "Konjsko": "−5,4° do +9°", "Melina": "−5,4° do +9°"}
+
+
+def _station(name):
+    for key, label in STATIONS.items():
+        if key in name.upper():
+            return label
+    return name
+
+
+def _unit(name):
+    if "VP " in name.upper():
+        return "VP " + name.upper().split("VP ", 1)[1].strip().title()
+    return name.split()[0]
+
+
+def _n(x, dec=None):
+    """Croatian number formatting."""
+    v = float(x)
+    if dec is None:
+        s = ("%.5f" % v).rstrip("0").rstrip(".")
+    else:
+        s = "%.*f" % (dec, v)
+    return s.replace("-", "−").replace(".", ",")
+
+
+def _interp(points, angle):
+    pts = [(float(t), float(f)) for t, f, _ in points]
+    if angle <= pts[0][0]:
+        return pts[0][1]
+    if angle >= pts[-1][0]:
+        return pts[-1][1]
+    for (a0, f0), (a1, f1) in zip(pts, pts[1:]):
+        if a0 <= angle <= a1:
+            return f0 + (f1 - f0) * (angle - a0) / (a1 - a0)
+    return 1.0
+
+
+def _z_sys(r_w, x_pu, s_pair, sbase=100.0):
+    rr = float(r_w) / (float(s_pair) * 1e6)
+    xx = float(x_pu)
+    return complex(rr, (max(xx * xx - rr * rr, 0.0)) ** 0.5) * sbase / float(s_pair)
+
+
+def _uk12_eff(rec, factor):
+    """Effective |Z12| [%] on SBASE1-2 for a given impedance factor (CZ=3 records)."""
+    l2 = rec["line2"]
+    s12 = float(l2["SBASE1-2"])
+    z12 = _z_sys(l2["R1-2"], l2["X1-2"], s12)
+    if not rec["three"]:
+        return 100.0 * abs(z12) * factor * s12 / 100.0
+    z23 = _z_sys(l2["R2-3"], l2["X2-3"], l2["SBASE2-3"])
+    z31 = _z_sys(l2["R3-1"], l2["X3-1"], l2["SBASE3-1"])
+    z1 = (z12 + z31 - z23) / 2.0
+    return 100.0 * abs(z12 + (factor - 1.0) * z1) * s12 / 100.0
+
+
+def _bus(buses, b):
+    rec = buses.get(b, {})
+    return "%s %s (%s kV)" % (b, rec.get("'NAME'", rec.get("NAME", "")).strip("' "),
+                              _n(rec.get("BASKV", "0")))
+
+
+def _station_table(recs, buses, tables):
+    units = [_unit(_name(r)) for r in recs]
+    rows = []
+
+    def row(label, fn):
+        vals = [fn(r) for r in recs]
+        rows.append("| %s | %s |" % (label, " | ".join(vals)))
+
+    three = recs[0]["three"]
+    w = lambda r, i, k: r["windings_full"][i]["raw"].get(k + str(i + 1)) if i < len(r["windings_full"]) else None
+    row("Priključak (namot 1 → namot 2)", lambda r: "%s → %s" % (_bus(buses, r["line1"]["I"]), _bus(buses, r["line1"]["J"])))
+    if three:
+        row("Tercijar (namot 3)", lambda r: _bus(buses, r["line1"]["K"]))
+    row("U pogonu", lambda r: "da" if r["line1"]["STAT"] == "1" else "**ne**")
+    nw = 3 if three else 2
+    row("Nazivni naponi namota NOMV [kV]", lambda r: " / ".join(
+        (_n(w(r, i, "NOMV")) if float(w(r, i, "NOMV") or 0) else "**0** (= bazni napon)") for i in range(nw)))
+    row("Namotni naponi WINDV [kV]", lambda r: " / ".join(_n(w(r, i, "WINDV")) for i in range(nw)))
+    if three:
+        row("Nazivne snage parova 1-2 / 2-3 / 3-1 [MVA]", lambda r: " / ".join(
+            _n(r["line2"][k]) for k in ("SBASE1-2", "SBASE2-3", "SBASE3-1")))
+        def rate(r, i):
+            v = r["windings_full"][i]["raw"].get("RATE%d-1" % (i + 1))
+            return "**0**" if float(v or 0) == 0 else _n(v)
+        row("RATE namota 1 / 2 / 3 [MVA]", lambda r: " / ".join(rate(r, i) for i in range(3)))
+        row("u<sub>k</sub> parova 1-2 / 2-3 / 3-1 [%] (na snazi para)", lambda r: " / ".join(
+            _n(100 * float(r["line2"][k]), 2) for k in ("X1-2", "X2-3", "X3-1")))
+        row("Gubici u bakru parova 1-2 / 2-3 / 3-1 [kW]", lambda r: " / ".join(
+            _n(float(r["line2"][k]) / 1000, 1) for k in ("R1-2", "R2-3", "R3-1")))
+    else:
+        row("Nazivna snaga [MVA]", lambda r: _n(r["line2"]["SBASE1-2"]))
+        row("RATE [MVA]", lambda r: _n(r["windings_full"][0]["raw"]["RATE1-1"]))
+        row("u<sub>k</sub> [%]", lambda r: _n(100 * float(r["line2"]["X1-2"]), 3))
+        row("Gubici u bakru [kW]", lambda r: _n(float(r["line2"]["R1-2"]) / 1000, 1))
+        row("Gubici u željezu [kW] (MAG1 · S<sub>B</sub>)", lambda r: _n(float(r["line1"]["MAG1"]) * 100e3, 1))
+    row("Kut u modelu ANG1 [°]", lambda r: "**%s**" % _n(w(r, 0, "ANG")))
+    row("Faktor F pri tom kutu *(izračunato)*", lambda r: _n(_interp(tables[w(r, 0, "TAB")], float(w(r, 0, "ANG"))), 4))
+    row("u<sub>k12</sub> pri tom kutu [%] *(izračunato)*", lambda r: _n(
+        _uk12_eff(r, _interp(tables[w(r, 0, "TAB")], float(w(r, 0, "ANG")))), 2))
+    row("Raspon kuta prema Tablici 3 smjernica", lambda r: TABLE3_RANGE.get(_station(_name(r)), "—"))
+    row("Tablica korekcije / broj točaka / raspon", lambda r: "%s / %d / %s° … %s°" % (
+        w(r, 0, "TAB"), len(tables[w(r, 0, "TAB")]), _n(tables[w(r, 0, "TAB")][0][0]), _n(tables[w(r, 0, "TAB")][-1][0])))
+    row("Broj položaja preklopke NTP1", lambda r: w(r, 0, "NTP"))
+
+    def reg(r):
+        rma, rmi, vma, vmi = (float(w(r, 0, k)) for k in ("RMA", "RMI", "VMA", "VMI"))
+        if abs(rma) > 90 or abs(rmi) > 90:
+            return "granice **napona** %s–%s kV, pojas %s–%s p.u." % (_n(rmi), _n(rma), _n(vmi), _n(vma))
+        return "granice **kuta** %s° … %s°, pojas toka %s … %s MW" % (_n(rmi), _n(rma), _n(vmi), _n(vma))
+    row("Granice u zapisu (RMA/RMI, VMA/VMI)", reg)
+    row("Regulacija (COD1 / regulirana sabirnica)", lambda r: "%s (kut, isključena) / %s" % (
+        w(r, 0, "COD").replace("-", "−"), w(r, 0, "CONT")))
+    if three:
+        row("Grupa spoja", lambda r: r["line1"].get("VECGRP") or "—")
+        row("Zvjezdište u rješenju (VMSTAR / ANSTAR)", lambda r: "%s p.u. / %s°" % (
+            _n(r["line2"]["VMSTAR"], 5), _n(r["line2"]["ANSTAR"], 4)))
+    head = "| | " + " | ".join(units) + " |\n|---|" + "---|" * len(units)
+    return head + "\n" + "\n".join(rows)
+
+
+def _impedance_table(tab_id, points, users):
+    """users: list of (station, rec). Rows = table points; model angles inserted as rows."""
+    stations = []
+    for st, r in users:
+        if st not in [s for s, _ in stations]:
+            stations.append((st, r))
+    has_uk = True
+    grouped = {}
+    for st, r in users:
+        a = float(r["windings_full"][0]["raw"]["ANG1"])
+        unit = _unit(_name(r)) + ("" if r["line1"]["STAT"] == "1" else " (izvan pogona)")
+        grouped.setdefault(a, {}).setdefault(st, []).append(unit)
+    marks = {a: ["%s %s" % (st, ", ".join(u)) for st, u in sts.items()] for a, sts in grouped.items()}
+    # same impedance data for all stations in this table?
+    uks = {st: r for st, r in stations}
+    same = len({tuple(r["line2"].get(k) for k in ("R1-2", "X1-2", "SBASE1-2", "R2-3", "X2-3", "SBASE2-3",
+                                                     "R3-1", "X3-1", "SBASE3-1")) for _, r in stations}) == 1
+    uk_cols = [stations[0]] if same else stations
+    head = "| Točka | Kut [°] | F | " + " | ".join(
+        "u<sub>k12</sub> [%]" + ("" if same else " " + st) for st, _ in uk_cols) + " | U modelu |"
+    out = [head, "|---|---|---|" + "---|" * len(uk_cols) + "---|"]
+    angles = [float(p[0]) for p in points]
+    extra = [a for a in marks if a not in angles]
+    rows = [(float(t), float(f), i + 1) for i, (t, f, _) in enumerate(points)]
+    rows += [(a, _interp(points, a), None) for a in extra]
+    rows.sort(key=lambda x: (x[0], x[2] is None))
+    for a, f, idx in rows:
+        uk = " | ".join(_n(_uk12_eff(r, f), 2) for _, r in uk_cols)
+        mark = ", ".join(marks.get(a, []))
+        if idx is None:
+            out.append("| *—* | ***%s*** | ***%s*** | *%s* | **%s** *(interpolirano)* |" % (_n(a), _n(f, 4), uk, mark))
+        else:
+            cell = "| %d | %s | %s | %s | %s |" % (idx, _n(a, 2), _n(f, 5), uk, ("**%s**" % mark) if mark else "")
+            out.append(cell)
+    return "\n".join(out), same
+
+
+def readable_report(path):
+    psts, tables, buses, _ = read_pst_records(path)
+    by_tab = {}
+    for r in psts:
+        by_tab.setdefault(r["windings_full"][0]["raw"]["TAB1"], []).append(r)
+    md = []
+    order = sorted(by_tab, key=lambda t: (not by_tab[t][0]["three"], -len(by_tab[t]), int(t)))
+    for t in order:
+        recs = by_tab[t]
+        stations = []
+        for r in recs:
+            st = _station(_name(r))
+            if st not in stations:
+                stations.append(st)
+        kind = "autotransformator" if recs[0]["three"] else "dvonamotni PST"
+        l1, l2 = recs[0]["line1"], recs[0]["line2"]
+        md.append("## %s — tablica korekcije %s\n" % (" i ".join(stations), t))
+        for st in stations:
+            srecs = [r for r in recs if _station(_name(r)) == st]
+            md.append("### %s (%s)\n" % (st, kind))
+            md.append(_station_table(srecs, buses, tables) + "\n")
+        users = [(_station(_name(r)), r) for r in recs]
+        tab_md, same = _impedance_table(t, tables[t], users)
+        md.append("### Tablica korekcije impedancije %s\n" % t)
+        note = ("u<sub>k12</sub> je izračunata efektivna impedancija para 1-2 na nazivnoj snazi para "
+                "za faktor F")
+        if recs[0]["three"]:
+            note += " (F se primjenjuje na Z<sub>1</sub> zvijezde, pogl. 2, §2.4)"
+        if same and len(stations) > 1:
+            note += "; %s imaju jednake podatke o impedancijama, pa je stupac zajednički" % " i ".join(stations)
+        md.append(note + ".\n")
+        md.append(tab_md + "\n")
+    return "\n".join(md), psts, tables
