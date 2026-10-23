@@ -14,7 +14,7 @@
 > kod dijagonalne regulacije nije ostvariv, a isporučeni modeli za to nemaju podatke —
 > vidi [Nedostaci smjernica, N1](../nedostaci-smjernica.md).
 
-Svi podaci koje `.raw` sadrži za svaki PST, doslovno i u tablicama: [Prilog A](prilog-pst-zapisi.md).
+Osnovni podaci i tablice korekcije svih PST-ova u modelu: [Prilog A](prilog-pst-zapisi.md).
 
 ## 2.1 Što PST radi
 

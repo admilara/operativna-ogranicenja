@@ -32,7 +32,7 @@ Stavke se odnose na ovu iteraciju smjernica i modela.
 >   (koja počinje na −6,00°).
 > - U modelima je `PHSHFT=0` i `ACTAPS=0`: PSS/E ni kut ni omjer ne regulira, oba su zaključana.
 >
-> Svi PST zapisi doslovno: [Prilog A](teorija/prilog-pst-zapisi.md).
+> Pregled svih PST-ova iz modela s tablicama korekcije: [Prilog A](teorija/prilog-pst-zapisi.md).
 >
 > **Što alat radi:** samo kutni model (kut + korekcija impedancije, omjer ostaje iz modela), uz
 > upozorenje u svakom ispisu ([pogl. 2](teorija/02-pst-korekcija-impedancije.md)). Kad budu

@@ -37,7 +37,7 @@ Skripte u `scripts/` pokreću se iz IDLE-a (F5); postavke su u bloku `POSTAVKE` 
 | Skripta | Što radi |
 |---|---|
 | `scripts/build_model.py` | `.raw` → pandapower, provjera prema spremljenom PSS/E rješenju, granica (X-čvorišta), spremanje mreže i izvještaja provjere |
-| `scripts/pst_report.py` | doslovni ispis svih podataka o PST-ovima iz `.raw`-a (Markdown + Excel) |
+| `scripts/pst_report.py` | pregled PST-ova iz `.raw`-a: osnovni podaci i tablice korekcije impedancije (Markdown) |
 | `scripts/htls_ratings.py` | nazivne vrijednosti vodova s HTLS (ACCC) vodičem u obliku Tablice 4 → `config/htls_ratings.csv` |
 
 Kod je u paketu `src/oplimits` (identifikatori na engleskom, poruke i izlazne tablice na hrvatskom).

@@ -1,352 +1,322 @@
-# Prilog A — PST-ovi u isporučenom modelu (A-2029)
+# Prilog A — PST-ovi u modelu A-2029
 
-Ovaj prilog sadrži **sve** podatke koje `.raw` datoteka modela scenarija A 2029. ima za
-transformatore s mogućnošću zakreta kuta: sva polja zapisa transformatora, zapise sabirnica na
-koje su priključeni i tablice korekcije impedancije. Ništa drugo u datoteci se na PST-ove ne
-odnosi — **napon namota po položaju preklopke u datoteci ne postoji** (v.
-[Nedostaci smjernica, N1](../nedostaci-smjernica.md)).
+Pregled svih transformatora s mogućnošću zakreta kuta u modelu scenarija A 2029.: osnovni podaci
+svakog transformatora i njegova tablica korekcije impedancije. Transformatori koji dijele istu
+tablicu prikazani su zajedno — **Konjsko i Melina imaju istu tablicu (4, od −5,4° do +9°) i iste
+podatke o impedancijama**.
 
-Tablice su generirane skriptom `scripts/pst_report.py`, koja se može pokrenuti na bilo kojem od
-42 modela. Provjereno je da ispis za svaki PST sadrži sva polja zapisa, istim redom i s istim
-vrijednostima kao datoteka (53 polja za dvonamotni, 114 za tronamotni transformator).
-Odabrani su transformatori koji imaju COD = ±3 na nekom namotu, tablicu korekcije impedancije
-ili kut različit od nule.
+Svi podaci su iz `.raw` datoteke; vrijednosti označene *(izračunato)* izvedene su iz njih.
+Stranicu generira skripta `scripts/pst_report.py`, pa se ista usporedba može napraviti za bilo
+koji od 42 modela. Napon namota po položaju preklopke u datoteci ne postoji
+([Nedostaci smjernica, N1](../nedostaci-smjernica.md)).
 
-> [!NOTE]
-> Stupci RATEx-2 … RATEx-12 sažeti su u jedan redak kad su svi jednaki nuli (u ovom modelu je
-> tako za sve PST-ove; zadan je samo RATEx-1).
+Kako čitati tablice korekcije:
 
-## Usporedba s Tablicom 3 smjernica
+- **F** je faktor kojim se množi nazivna impedancija (pogl. 2, §2.2); impedancija u `.raw`-u
+  je ona uz F = 1, na rubu tablice.
+- **u<sub>k12</sub>** je efektivna impedancija između namota 1 i 2 pri tom faktoru, na nazivnoj
+  snazi para. Kod autotransformatora F djeluje na Z<sub>1</sub> zvijezde, pa se u<sub>k12</sub>
+  mijenja više od F.
+- Redak *u kosim slovima* je kut iz modela kad ne pada na točku tablice — faktor je tada
+  linearno interpoliran.
+- Podebljane vrijednosti u tablicama osnovnih podataka označavaju odstupanja koja treba
+  primijetiti (izvan pogona, nula umjesto vrijednosti).
 
-| PST | Tablica 3: snaga | SBASE1-2 | Tablica 3: kut | RMA1 / RMI1 u `.raw`-u | Raspon tablice korekcije | Napomena |
-|---|---|---|---|---|---|---|
-| Gračac (2×) | 150 MVA | 150.00 | ±30° | 30.0000 / −30.000 (°) | −30,00° … +30,00° | usklađeno |
-| Senj | 200 MVA | 200.00 | −6,3° do +10,54° | 10.0000 / −6.3000 (°) | −6,00° … +10,54° | **RMA1 = 10,0° umjesto 10,54°; RMI1 = −6,3° je izvan tablice korekcije (počinje na −6,00°)** |
-| Žerjavinec | 400 MVA | 400.00 | −4,48° do +6,76° | 416.000 / 375.100 (kV) | −4,48° … +6,76° | granice u `.raw`-u su naponi, ne kutovi |
-| Konjsko (3×) | 400 MVA | 400.00 | −5,4° do +9° | 416.738 / 367.701 (kV) | −5,40° … +9,00° | granice u `.raw`-u su naponi, ne kutovi |
-| Melina (2×) | 400 MVA | 400.00 | −5,4° do +9° | 416.740 / 367.700 (kV) | −5,40° … +9,00° | granice u `.raw`-u su naponi, ne kutovi |
+## Konjsko i Melina — tablica korekcije 4
 
-Kod kuta izvan tablice PSS/E (i alat) uzima rubnu vrijednost faktora, pa bi Senj na −6,3° imao
-$F = 1$, kao na −6,0°.
+### Konjsko (autotransformator)
 
-## Zapažanja iz zapisa
+| | T1 | T2 | T3 |
+|---|---|---|---|
+| Priključak (namot 1 → namot 2) | 60049 HKONJS11 (400 kV) → 60050 HKONJS21 (220 kV) | 60049 HKONJS11 (400 kV) → 60050 HKONJS21 (220 kV) | 60049 HKONJS11 (400 kV) → 60050 HKONJS21 (220 kV) |
+| Tercijar (namot 3) | 23079 KONJSKO (30 kV) | 23080 KONJSKO (30 kV) | 23078 KONJSKO (30 kV) |
+| U pogonu | da | da | da |
+| Nazivni naponi namota NOMV [kV] | 400 / 220 / 30 | 400 / 220 / 30 | 400 / 220 / **0** (= bazni napon) |
+| Namotni naponi WINDV [kV] | 412,5 / 231 / 31,5 | 412,5 / 231 / 31,5 | 412,5 / 230,999 / 30 |
+| Nazivne snage parova 1-2 / 2-3 / 3-1 [MVA] | 400 / 100 / 100 | 400 / 100 / 100 | 400 / 100 / 100 |
+| RATE namota 1 / 2 / 3 [MVA] | 400 / 400 / 100 | 400 / 400 / 100 | 400 / 400 / 100 |
+| u<sub>k</sub> parova 1-2 / 2-3 / 3-1 [%] (na snazi para) | 11,67 / 4,00 / 13,35 | 11,67 / 4,00 / 13,35 | 11,67 / 4,00 / 13,35 |
+| Gubici u bakru parova 1-2 / 2-3 / 3-1 [kW] | 582,4 / 233,6 / 237,1 | 582,4 / 233,6 / 237,1 | 582,4 / 233,6 / 237,1 |
+| Kut u modelu ANG1 [°] | **5,5** | **5,5** | **5,5** |
+| Faktor F pri tom kutu *(izračunato)* | 0,7903 | 0,7903 | 0,7903 |
+| u<sub>k12</sub> pri tom kutu [%] *(izračunato)* | 6,52 | 6,52 | 6,52 |
+| Raspon kuta prema Tablici 3 smjernica | −5,4° do +9° | −5,4° do +9° | −5,4° do +9° |
+| Tablica korekcije / broj točaka / raspon | 4 / 25 / −5,4° … 9° | 4 / 25 / −5,4° … 9° | 4 / 25 / −5,4° … 9° |
+| Broj položaja preklopke NTP1 | 33 | 33 | 33 |
+| Granice u zapisu (RMA/RMI, VMA/VMI) | granice **napona** 367,701–416,738 kV, pojas 0,9–1,1 p.u. | granice **napona** 367,701–416,738 kV, pojas 0,9–1,1 p.u. | granice **napona** 367,701–416,738 kV, pojas 0,9–1,1 p.u. |
+| Regulacija (COD1 / regulirana sabirnica) | −3 (kut, isključena) / 60050 | −3 (kut, isključena) / 60050 | −3 (kut, isključena) / 60050 |
+| Grupa spoja | — | — | — |
+| Zvjezdište u rješenju (VMSTAR / ANSTAR) | 1,00119 p.u. / 127,0577° | 1,00119 p.u. / 127,0577° | 1,00120 p.u. / 127,0577° |
 
-Sve navedeno provjereno je usporedbom zapisa polje po polje.
+### Melina (autotransformator)
 
-**Gračac (dvonamotni, 110/110 kV, 150 MVA)**
-
-- Dva PST-a, VP Velebit (I = 80049) i VP Lički Osik (I = 80050), oba prema sabirnici 60035 HGRACA51.
-- VP Velebit je **izvan pogona**: STAT = 0, a sabirnica 80049 ima IDE = 4. Kut mu je 18°.
-- VP Lički Osik je u pogonu s kutom 9°.
-- Zapisi se razlikuju još samo u X1-2 (8.50266E-02 i 8.50271E-02) i CR1 (0 i 0.00020).
-  CR1 je kompenzacija pada napona i kod kutne regulacije (COD = ±3) nema učinka.
-- RMA1/RMI1 su granice kuta (±30°), a VMA1/VMI1 granice toka (±150 MW) — pravi kutni zapis.
-- CONT1 je vlastita sabirnica PST-a (80049, odnosno 80050).
-- MAG1 = 4.05000E-04 (CM = 1: vodljivost magnetiziranja u p.u.) — jedini PST-ovi s magnetiziranjem.
-- Zapis retka 1 ima 21 polje: polje ZCOD nedostaje (PSS/E tada uzima 0).
-- NTP1 = 33 položaja, a tablica 1 ima 32 točke: nedostaje +22,50° (−22,50° postoji).
-
-**Konjsko T1–T3 (autotransformatori 400/220/30 kV, 400/400/100 MVA)**
-
-- Impedancije, kut (5,5°), WINDV1 (412,5 kV), granice i tablica (4) jednaki su za sva tri.
-- T3 se razlikuje od T1 i T2: WINDV2 = 230.999 umjesto 231.000, a tercijar WINDV3 = 30.0000 uz
-  NOMV3 = 0.000 umjesto 31.5000 / 30.000.
-- NTP1 = 33 položaja, a tablica 4 ima 25 točaka.
-
-**Melina T1–T2 (autotransformatori 400/220/30 kV)**
-
-- Impedancije su jednake Konjskom — svih devet vrijednosti retka 2 osim VMSTAR/ANSTAR.
-- Kut je 0°, WINDV1 = 400.000 kV, tablica 4.
-- **Zapis T1 je nepotpun u odnosu na T2**: NOMV1, NOMV2 i NOMV3 su 0.000 (kod T2 400 / 220 / 30),
-  RATE1-1 = 0.00 (T2: 400.00), RATE3-1 = 0.00 (T2: 100.00), WINDV3 = 30.0000 (T2: 31.5000).
-  Uz CW = 2 NOMV = 0 znači "bazni napon sabirnice" pa na rješenje ne utječe, ali nazivne
-  vrijednosti namota 1 i 3 nedostaju.
-- Samo Melina ima zadanu grupu spoja: VECGRP = YNa0d5. Kod ostalih je polje prazno.
-
-**Senj T1 (220/110/10 kV, 200/200/66 MVA)**
-
-- Pravi kutni zapis: RMA1/RMI1 = 10,0° / −6,3°, VMA1/VMI1 = −190 / −195 MW (pojas toka),
-  CONT1 = 60157 (110 kV).
-- NTP1 = 25 = broj točaka tablice 3. Kut je 8,97°.
-
-**Žerjavinec T1 (400/220/10 kV, 400/400/100 MVA)**
-
-- Kut je 0°, WINDV1 = 400.663 kV.
-- RMA1/RMI1 = 416.000 / 375.100 kV, VMA1/VMI1 = 1.04000 / 1.00000 p.u. (uži pojas od Konjskog i
-  Meline), CONT1 = 60151 (220 kV).
-- NTP1 = 25 = broj točaka tablice 2.
-
-**Zajedničko**
-
-- Svi PST-ovi imaju COD1 = −3 (kutna regulacija, isključena u rješavaču).
-- Namoti 2 i 3 svih tronamotnih PST-ova imaju COD = 0, TAB = 0 i zadane vrijednosti
-  RMA/RMI/VMA/VMI = 1.1 / 0.9 te NTP = 33 — regulacije na njima nema.
-- CR/CX = 0 osim CR1 na Gračacu. MAG1/MAG2 = 0 kod svih tronamotnih.
-- Imaginarni dio faktora korekcije je 0 u svim točkama.
-- Tercijari su neopterećeni: kut sabirnice tercijara jednak je ANSTAR, a napon je VMSTAR
-  pomnožen omjerom WINDV3/NOMV3 (npr. Konjsko T1: 1,00119 · 31,5/30 = 1,05125).
-
-## Doslovni zapisi
-
-Izvor: `ScA_2029.raw`. Vrijednosti su prepisane **doslovno** iz datoteke (bez pretvorbe i zaokruživanja); nazivi polja su iz zaglavlja `@!` same datoteke. Polja koja u zapisu nedostaju označena su *(nema u zapisu)*.
-
-### Pregled
-
-| Transformator | Vrsta | I | J | K | STAT | COD1 | CONT1 | ANG1 | WINDV1 | NTP1 | TAB1 | RMA1 / RMI1 | VMA1 / VMI1 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| PST GRACAC  - VP VELEBIT | 2W | 80049 | 60035 | 0 | 0 | -3 | 80049 | 18.000 | 110.000 | 33 | 1 | 30.0000 / -30.000 | 150.000 / -150.00 |
-| PST GRACAC  - VP LICKI OSIK | 2W | 80050 | 60035 | 0 | 1 | -3 | 80050 | 9.000 | 110.000 | 33 | 1 | 30.0000 / -30.000 | 150.000 / -150.00 |
-| T1 400 KONJS | 3W | 60049 | 60050 | 23079 | 1 | -3 | 60050 | 5.500 | 412.500 | 33 | 4 | 416.738 / 367.701 | 1.10000 / 0.90000 |
-| T2 400 KONJS | 3W | 60049 | 60050 | 23080 | 1 | -3 | 60050 | 5.500 | 412.500 | 33 | 4 | 416.738 / 367.701 | 1.10000 / 0.90000 |
-| T3 400 KONJS | 3W | 60049 | 60050 | 23078 | 1 | -3 | 60050 | 5.500 | 412.500 | 33 | 4 | 416.738 / 367.701 | 1.10000 / 0.90000 |
-| T1 400 MELIN | 3W | 60066 | 60067 | 23047 | 1 | -3 | 60067 | 0.000 | 400.000 | 33 | 4 | 416.740 / 367.700 | 1.10000 / 0.90000 |
-| T2 400 MELIN | 3W | 60066 | 60067 | 23048 | 1 | -3 | 60067 | 0.000 | 400.000 | 33 | 4 | 416.740 / 367.700 | 1.10000 / 0.90000 |
-| T1 220 HE SE | 3W | 60109 | 60157 | 23065 | 1 | -3 | 60157 | 8.970 | 230.562 | 25 | 3 | 10.0000 / -6.3000 | -190.00 / -195.00 |
-| T1 400 ZERJA | 3W | 60150 | 60151 | 23039 | 1 | -3 | 60151 | 0.000 | 400.663 | 25 | 2 | 416.000 / 375.100 | 1.04000 / 1.00000 |
-
-### Dvonamotni PST-ovi
-
-**Redak 1 — opći podaci**
-
-| Polje | PST GRACAC  - VP VELEBIT | PST GRACAC  - VP LICKI OSIK |
+| | T1 | T2 |
 |---|---|---|
-| I | `80049` | `80050` |
-| J | `60035` | `60035` |
-| K | `0` | `0` |
-| CKT | `1` | `1` |
-| CW | `2` | `2` |
-| CZ | `3` | `3` |
-| CM | `1` | `1` |
-| MAG1 | `4.05000E-04` | `4.05000E-04` |
-| MAG2 | `0.00000E+00` | `0.00000E+00` |
-| NMETR | `2` | `2` |
-| N A M E | `PST GRACAC  - VP VELEBIT` | `PST GRACAC  - VP LICKI OSIK` |
-| STAT | `0` | `1` |
-| O1 | `402` | `402` |
-| F1 | `1.0000` | `1.0000` |
-| O2 | `0` | `0` |
-| F2 | `1.0000` | `1.0000` |
-| O3 | `0` | `0` |
-| F3 | `1.0000` | `1.0000` |
-| O4 | `0` | `0` |
-| F4 | `1.0000` | `1.0000` |
-| VECGRP | *(prazno)* | *(prazno)* |
-| ZCOD | *(nema u zapisu)* | *(nema u zapisu)* |
+| Priključak (namot 1 → namot 2) | 60066 HMELIN11 (400 kV) → 60067 HMELIN21 (220 kV) | 60066 HMELIN11 (400 kV) → 60067 HMELIN21 (220 kV) |
+| Tercijar (namot 3) | 23047 MELINA (30 kV) | 23048 MELINA (30 kV) |
+| U pogonu | da | da |
+| Nazivni naponi namota NOMV [kV] | **0** (= bazni napon) / **0** (= bazni napon) / **0** (= bazni napon) | 400 / 220 / 30 |
+| Namotni naponi WINDV [kV] | 400 / 231 / 30 | 400 / 231 / 31,5 |
+| Nazivne snage parova 1-2 / 2-3 / 3-1 [MVA] | 400 / 100 / 100 | 400 / 100 / 100 |
+| RATE namota 1 / 2 / 3 [MVA] | **0** / 400 / **0** | 400 / 400 / 100 |
+| u<sub>k</sub> parova 1-2 / 2-3 / 3-1 [%] (na snazi para) | 11,67 / 4,00 / 13,35 | 11,67 / 4,00 / 13,35 |
+| Gubici u bakru parova 1-2 / 2-3 / 3-1 [kW] | 582,4 / 233,6 / 237,1 | 582,4 / 233,6 / 237,1 |
+| Kut u modelu ANG1 [°] | **0** | **0** |
+| Faktor F pri tom kutu *(izračunato)* | 0,8333 | 0,8333 |
+| u<sub>k12</sub> pri tom kutu [%] *(izračunato)* | 7,58 | 7,58 |
+| Raspon kuta prema Tablici 3 smjernica | −5,4° do +9° | −5,4° do +9° |
+| Tablica korekcije / broj točaka / raspon | 4 / 25 / −5,4° … 9° | 4 / 25 / −5,4° … 9° |
+| Broj položaja preklopke NTP1 | 33 | 33 |
+| Granice u zapisu (RMA/RMI, VMA/VMI) | granice **napona** 367,7–416,74 kV, pojas 0,9–1,1 p.u. | granice **napona** 367,7–416,74 kV, pojas 0,9–1,1 p.u. |
+| Regulacija (COD1 / regulirana sabirnica) | −3 (kut, isključena) / 60067 | −3 (kut, isključena) / 60067 |
+| Grupa spoja | YNa0d5 | YNa0d5 |
+| Zvjezdište u rješenju (VMSTAR / ANSTAR) | 0,95381 p.u. / 83,6743° | 0,95381 p.u. / 83,6743° |
 
-**Redak 2 — impedancije i zvjezdište**
+### Tablica korekcije impedancije 4
 
-| Polje | PST GRACAC  - VP VELEBIT | PST GRACAC  - VP LICKI OSIK |
+u<sub>k12</sub> je izračunata efektivna impedancija para 1-2 na nazivnoj snazi para za faktor F (F se primjenjuje na Z<sub>1</sub> zvijezde, pogl. 2, §2.4); Konjsko i Melina imaju jednake podatke o impedancijama, pa je stupac zajednički.
+
+| Točka | Kut [°] | F | u<sub>k12</sub> [%] | U modelu |
+|---|---|---|---|---|
+| 1 | −5,40 | 1,00000 | 11,67 |  |
+| 2 | −5,05 | 0,98610 | 11,33 |  |
+| 3 | −4,69 | 0,97220 | 10,99 |  |
+| 4 | −4,30 | 0,95830 | 10,65 |  |
+| 5 | −3,91 | 0,94440 | 10,31 |  |
+| 6 | −3,48 | 0,93060 | 9,97 |  |
+| 7 | −3,04 | 0,91670 | 9,63 |  |
+| 8 | −2,58 | 0,90280 | 9,28 |  |
+| 9 | −2,11 | 0,88890 | 8,94 |  |
+| 10 | −1,60 | 0,87500 | 8,60 |  |
+| 11 | −1,10 | 0,86110 | 8,26 |  |
+| 12 | −0,55 | 0,84720 | 7,92 |  |
+| 13 | 0,00 | 0,83330 | 7,58 | **Melina T1, T2** |
+| 14 | 0,64 | 0,82780 | 7,44 |  |
+| 15 | 1,29 | 0,82220 | 7,31 |  |
+| 16 | 1,97 | 0,81670 | 7,17 |  |
+| 17 | 2,68 | 0,81110 | 7,03 |  |
+| 18 | 3,39 | 0,80560 | 6,90 |  |
+| 19 | 4,14 | 0,80000 | 6,76 |  |
+| 20 | 4,91 | 0,79440 | 6,62 |  |
+| *—* | ***5,5*** | ***0,7903*** | *6,52* | **Konjsko T1, T2, T3** *(interpolirano)* |
+| 21 | 5,70 | 0,78890 | 6,49 |  |
+| 22 | 6,50 | 0,78330 | 6,35 |  |
+| 23 | 7,31 | 0,77780 | 6,22 |  |
+| 24 | 8,15 | 0,77222 | 6,08 |  |
+| 25 | 9,00 | 0,76670 | 5,94 |  |
+
+## Žerjavinec — tablica korekcije 2
+
+### Žerjavinec (autotransformator)
+
+| | T1 |
+|---|---|
+| Priključak (namot 1 → namot 2) | 60150 HZERJA11 (400 kV) → 60151 HZERJA21 (220 kV) |
+| Tercijar (namot 3) | 23039 ZERJAVINEC (10 kV) |
+| U pogonu | da |
+| Nazivni naponi namota NOMV [kV] | 400 / 220 / 10 |
+| Namotni naponi WINDV [kV] | 400,663 / 231 / 10,5 |
+| Nazivne snage parova 1-2 / 2-3 / 3-1 [MVA] | 400 / 100 / 100 |
+| RATE namota 1 / 2 / 3 [MVA] | 400 / 400 / 100 |
+| u<sub>k</sub> parova 1-2 / 2-3 / 3-1 [%] (na snazi para) | 12,22 / 9,00 / 14,00 |
+| Gubici u bakru parova 1-2 / 2-3 / 3-1 [kW] | 582,4 / 242,0 / 236,0 |
+| Kut u modelu ANG1 [°] | **0** |
+| Faktor F pri tom kutu *(izračunato)* | 0,8349 |
+| u<sub>k12</sub> pri tom kutu [%] *(izračunato)* | 9,56 |
+| Raspon kuta prema Tablici 3 smjernica | −4,48° do +6,76° |
+| Tablica korekcije / broj točaka / raspon | 2 / 25 / −4,48° … 6,76° |
+| Broj položaja preklopke NTP1 | 25 |
+| Granice u zapisu (RMA/RMI, VMA/VMI) | granice **napona** 375,1–416 kV, pojas 1–1,04 p.u. |
+| Regulacija (COD1 / regulirana sabirnica) | −3 (kut, isključena) / 60151 |
+| Grupa spoja | — |
+| Zvjezdište u rješenju (VMSTAR / ANSTAR) | 0,97288 p.u. / 87,0324° |
+
+### Tablica korekcije impedancije 2
+
+u<sub>k12</sub> je izračunata efektivna impedancija para 1-2 na nazivnoj snazi para za faktor F (F se primjenjuje na Z<sub>1</sub> zvijezde, pogl. 2, §2.4).
+
+| Točka | Kut [°] | F | u<sub>k12</sub> [%] | U modelu |
+|---|---|---|---|---|
+| 1 | −4,48 | 1,00000 | 12,22 |  |
+| 2 | −4,19 | 0,98620 | 12,00 |  |
+| 3 | −3,89 | 0,97250 | 11,78 |  |
+| 4 | −3,57 | 0,95870 | 11,55 |  |
+| 5 | −3,24 | 0,94500 | 11,33 |  |
+| 6 | −2,89 | 0,93120 | 11,11 |  |
+| 7 | −2,52 | 0,91740 | 10,89 |  |
+| 8 | −2,14 | 0,90370 | 10,67 |  |
+| 9 | −1,75 | 0,88990 | 10,45 |  |
+| 10 | −1,33 | 0,87620 | 10,23 |  |
+| 11 | −0,91 | 0,86240 | 10,00 |  |
+| 12 | −0,46 | 0,84870 | 9,78 |  |
+| 13 | 0,00 | 0,83490 | 9,56 | **Žerjavinec T1** |
+| 14 | 0,48 | 0,83000 | 9,48 |  |
+| 15 | 0,97 | 0,82510 | 9,40 |  |
+| 16 | 1,48 | 0,82020 | 9,32 |  |
+| 17 | 2,01 | 0,81530 | 9,24 |  |
+| 18 | 2,55 | 0,81040 | 9,17 |  |
+| 19 | 3,11 | 0,80550 | 9,09 |  |
+| 20 | 3,69 | 0,80060 | 9,01 |  |
+| 21 | 4,28 | 0,79570 | 8,93 |  |
+| 22 | 4,88 | 0,79080 | 8,85 |  |
+| 23 | 5,49 | 0,78590 | 8,77 |  |
+| 24 | 6,12 | 0,78100 | 8,69 |  |
+| 25 | 6,76 | 0,77610 | 8,61 |  |
+
+## Senj — tablica korekcije 3
+
+### Senj (autotransformator)
+
+| | T1 |
+|---|---|
+| Priključak (namot 1 → namot 2) | 60109 HSENJ 21 (220 kV) → 60157 HSENJ 51 (110 kV) |
+| Tercijar (namot 3) | 23065 HESENJ (10 kV) |
+| U pogonu | da |
+| Nazivni naponi namota NOMV [kV] | 220 / 110 / 10 |
+| Namotni naponi WINDV [kV] | 230,562 / 115 / 10,5 |
+| Nazivne snage parova 1-2 / 2-3 / 3-1 [MVA] | 200 / 66 / 66 |
+| RATE namota 1 / 2 / 3 [MVA] | 200 / 200 / 66 |
+| u<sub>k</sub> parova 1-2 / 2-3 / 3-1 [%] (na snazi para) | 12,93 / 9,50 / 12,93 |
+| Gubici u bakru parova 1-2 / 2-3 / 3-1 [kW] | 510,0 / 225,0 / 225,0 |
+| Kut u modelu ANG1 [°] | **8,97** |
+| Faktor F pri tom kutu *(izračunato)* | 0,7403 |
+| u<sub>k12</sub> pri tom kutu [%] *(izračunato)* | 9,90 |
+| Raspon kuta prema Tablici 3 smjernica | −6,3° do +10,54° |
+| Tablica korekcije / broj točaka / raspon | 3 / 25 / −6° … 10,54° |
+| Broj položaja preklopke NTP1 | 25 |
+| Granice u zapisu (RMA/RMI, VMA/VMI) | granice **kuta** −6,3° … 10°, pojas toka −195 … −190 MW |
+| Regulacija (COD1 / regulirana sabirnica) | −3 (kut, isključena) / 60157 |
+| Grupa spoja | — |
+| Zvjezdište u rješenju (VMSTAR / ANSTAR) | 0,96473 p.u. / 92,8033° |
+
+### Tablica korekcije impedancije 3
+
+u<sub>k12</sub> je izračunata efektivna impedancija para 1-2 na nazivnoj snazi para za faktor F (F se primjenjuje na Z<sub>1</sub> zvijezde, pogl. 2, §2.4).
+
+| Točka | Kut [°] | F | u<sub>k12</sub> [%] | U modelu |
+|---|---|---|---|---|
+| 1 | −6,00 | 1,00000 | 12,93 |  |
+| 2 | −5,93 | 0,97780 | 12,67 |  |
+| 3 | −5,53 | 0,95560 | 12,41 |  |
+| 4 | −5,10 | 0,93340 | 12,15 |  |
+| 5 | −4,65 | 0,91110 | 11,89 |  |
+| 6 | −4,18 | 0,88890 | 11,63 |  |
+| 7 | −3,67 | 0,86670 | 11,38 |  |
+| 8 | −3,14 | 0,84450 | 11,12 |  |
+| 9 | −2,57 | 0,82230 | 10,86 |  |
+| 10 | −1,98 | 0,80010 | 10,60 |  |
+| 11 | −1,35 | 0,77780 | 10,34 |  |
+| 12 | −0,69 | 0,75560 | 10,08 |  |
+| 13 | 0,00 | 0,73340 | 9,82 |  |
+| 14 | 0,72 | 0,73410 | 9,83 |  |
+| 15 | 1,48 | 0,73470 | 9,84 |  |
+| 16 | 2,26 | 0,73540 | 9,84 |  |
+| 17 | 3,08 | 0,73610 | 9,85 |  |
+| 18 | 3,92 | 0,73670 | 9,86 |  |
+| 19 | 4,80 | 0,73740 | 9,87 |  |
+| 20 | 5,70 | 0,73800 | 9,87 |  |
+| 21 | 6,63 | 0,73870 | 9,88 |  |
+| 22 | 7,58 | 0,73940 | 9,89 |  |
+| 23 | 8,55 | 0,74000 | 9,90 |  |
+| *—* | ***8,97*** | ***0,7403*** | *9,90* | **Senj T1** *(interpolirano)* |
+| 24 | 9,54 | 0,74070 | 9,91 |  |
+| 25 | 10,54 | 0,74130 | 9,91 |  |
+
+## Gračac — tablica korekcije 1
+
+### Gračac (dvonamotni PST)
+
+| | VP Velebit | VP Licki Osik |
 |---|---|---|
-| R1-2 | `3.18825E+05` | `3.18825E+05` |
-| X1-2 | `8.50266E-02` | `8.50271E-02` |
-| SBASE1-2 | `150.00` | `150.00` |
+| Priključak (namot 1 → namot 2) | 80049 PST GRACAC (110 kV) → 60035 HGRACA51 (110 kV) | 80050 PST GRACAC2 (110 kV) → 60035 HGRACA51 (110 kV) |
+| U pogonu | **ne** | da |
+| Nazivni naponi namota NOMV [kV] | 110 / 110 | 110 / 110 |
+| Namotni naponi WINDV [kV] | 110 / 110 | 110 / 110 |
+| Nazivna snaga [MVA] | 150 | 150 |
+| RATE [MVA] | 150 | 150 |
+| u<sub>k</sub> [%] | 8,503 | 8,503 |
+| Gubici u bakru [kW] | 318,8 | 318,8 |
+| Gubici u željezu [kW] (MAG1 · S<sub>B</sub>) | 40,5 | 40,5 |
+| Kut u modelu ANG1 [°] | **18** | **9** |
+| Faktor F pri tom kutu *(izračunato)* | 0,3661 | 0,0925 |
+| u<sub>k12</sub> pri tom kutu [%] *(izračunato)* | 3,11 | 0,79 |
+| Raspon kuta prema Tablici 3 smjernica | ±30° | ±30° |
+| Tablica korekcije / broj točaka / raspon | 1 / 32 / −30° … 30° | 1 / 32 / −30° … 30° |
+| Broj položaja preklopke NTP1 | 33 | 33 |
+| Granice u zapisu (RMA/RMI, VMA/VMI) | granice **kuta** −30° … 30°, pojas toka −150 … 150 MW | granice **kuta** −30° … 30°, pojas toka −150 … 150 MW |
+| Regulacija (COD1 / regulirana sabirnica) | −3 (kut, isključena) / 80049 | −3 (kut, isključena) / 80050 |
 
-**Redak 3 — namot 1**
+### Tablica korekcije impedancije 1
 
-| Polje | PST GRACAC  - VP VELEBIT | PST GRACAC  - VP LICKI OSIK |
-|---|---|---|
-| WINDV1 | `110.000` | `110.000` |
-| NOMV1 | `110.000` | `110.000` |
-| ANG1 | `18.000` | `9.000` |
-| RATE1-1 | `150.00` | `150.00` |
-| RATE1-2 … RATE1-12 | svi `0.00` | svi `0.00` |
-| COD1 | `-3` | `-3` |
-| CONT1 | `80049` | `80050` |
-| NOD1 | `0` | `0` |
-| RMA1 | `30.0000` | `30.0000` |
-| RMI1 | `-30.000` | `-30.000` |
-| VMA1 | `150.000` | `150.000` |
-| VMI1 | `-150.00` | `-150.00` |
-| NTP1 | `33` | `33` |
-| TAB1 | `1` | `1` |
-| CR1 | `0.00000` | `0.00020` |
-| CX1 | `0.00000` | `0.00000` |
-| CNXA1 | `0.000` | `0.000` |
+u<sub>k12</sub> je izračunata efektivna impedancija para 1-2 na nazivnoj snazi para za faktor F.
 
-**Redak 4 — namot 2**
+| Točka | Kut [°] | F | u<sub>k12</sub> [%] | U modelu |
+|---|---|---|---|---|
+| 1 | −30,00 | 1,00000 | 8,50 |  |
+| 2 | −28,12 | 0,88135 | 7,49 |  |
+| 3 | −26,25 | 0,76970 | 6,54 |  |
+| 4 | −24,38 | 0,66532 | 5,66 |  |
+| 5 | −22,50 | 0,56810 | 4,83 |  |
+| 6 | −20,62 | 0,47840 | 4,07 |  |
+| 7 | −18,75 | 0,39612 | 3,37 |  |
+| 8 | −16,88 | 0,32140 | 2,73 |  |
+| 9 | −15,00 | 0,25433 | 2,16 |  |
+| 10 | −13,12 | 0,19499 | 1,66 |  |
+| 11 | −11,25 | 0,14342 | 1,22 |  |
+| 12 | −9,38 | 0,09970 | 0,85 |  |
+| 13 | −7,50 | 0,06386 | 0,54 |  |
+| 14 | −5,63 | 0,03594 | 0,31 |  |
+| 15 | −3,75 | 0,01598 | 0,14 |  |
+| 16 | −1,88 | 0,00400 | 0,03 |  |
+| 17 | 0,00 | 0,00010 | 0,00 |  |
+| 18 | 1,88 | 0,00400 | 0,03 |  |
+| 19 | 3,75 | 0,01600 | 0,14 |  |
+| 20 | 5,63 | 0,03590 | 0,31 |  |
+| 21 | 7,50 | 0,06390 | 0,54 |  |
+| *—* | ***9*** | ***0,0925*** | *0,79* | **Gračac VP Licki Osik** *(interpolirano)* |
+| 22 | 9,38 | 0,09970 | 0,85 |  |
+| 23 | 11,25 | 0,14340 | 1,22 |  |
+| 24 | 13,12 | 0,19500 | 1,66 |  |
+| 25 | 15,00 | 0,25430 | 2,16 |  |
+| 26 | 16,88 | 0,32140 | 2,73 |  |
+| *—* | ***18*** | ***0,3661*** | *3,11* | **Gračac VP Velebit (izvan pogona)** *(interpolirano)* |
+| 27 | 18,75 | 0,39610 | 3,37 |  |
+| 28 | 20,62 | 0,47840 | 4,07 |  |
+| 29 | 24,38 | 0,66530 | 5,66 |  |
+| 30 | 26,25 | 0,76970 | 6,54 |  |
+| 31 | 28,12 | 0,88140 | 7,49 |  |
+| 32 | 30,00 | 1,00000 | 8,50 |  |
 
-| Polje | PST GRACAC  - VP VELEBIT | PST GRACAC  - VP LICKI OSIK |
-|---|---|---|
-| WINDV2 | `110.000` | `110.000` |
-| NOMV2 | `110.00` | `110.00` |
 
-### Tronamotni PST-ovi (autotransformatori)
+## Zapažanja
 
-**Redak 1 — opći podaci**
+**Konjsko i Melina**
 
-| Polje | T1 400 KONJS | T2 400 KONJS | T3 400 KONJS | T1 400 MELIN | T2 400 MELIN | T1 220 HE SE | T1 400 ZERJA |
-|---|---|---|---|---|---|---|---|
-| I | `60049` | `60049` | `60049` | `60066` | `60066` | `60109` | `60150` |
-| J | `60050` | `60050` | `60050` | `60067` | `60067` | `60157` | `60151` |
-| K | `23079` | `23080` | `23078` | `23047` | `23048` | `23065` | `23039` |
-| CKT | `T1` | `T2` | `T3` | `T1` | `T2` | `T1` | `T1` |
-| CW | `2` | `2` | `2` | `2` | `2` | `2` | `2` |
-| CZ | `3` | `3` | `3` | `3` | `3` | `3` | `3` |
-| CM | `1` | `1` | `1` | `1` | `1` | `1` | `1` |
-| MAG1 | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` |
-| MAG2 | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` | `0.00000E+00` |
-| NMETR | `2` | `2` | `2` | `2` | `2` | `2` | `2` |
-| N A M E | `T1 400 KONJS` | `T2 400 KONJS` | `T3 400 KONJS` | `T1 400 MELIN` | `T2 400 MELIN` | `T1 220 HE SE` | `T1 400 ZERJA` |
-| STAT | `1` | `1` | `1` | `1` | `1` | `1` | `1` |
-| O1 | `1` | `1` | `1` | `1` | `1` | `1` | `1` |
-| F1 | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` |
-| O2 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| F2 | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` |
-| O3 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| F3 | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` |
-| O4 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| F4 | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` | `1.0000` |
-| VECGRP | *(prazno)* | *(prazno)* | *(prazno)* | `YNa0d5` | `YNa0d5` | *(prazno)* | *(prazno)* |
-| ZCOD | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
+- Svih pet autotransformatora ima iste impedancije, istu tablicu (4) i iste granice (oko 367,7–416,7 kV).
+- **Konjsko T3** razlikuje se od T1 i T2: namot 2 ima 230,999 kV umjesto 231 kV, a tercijar
+  30 kV bez nazivnog napona umjesto 31,5/30 kV.
+- **Zapis Melina T1 je nepotpun** u odnosu na T2: nazivni naponi svih namota su 0, RATE namota
+  1 i 3 je 0, a tercijar je 30 kV umjesto 31,5 kV ([M4](../nedostaci-smjernica.md)).
+- Granice u zapisu su naponi namota 400 kV, a ne kutovi (dijagonalna regulacija).
+- Tablica ima 25 točaka, a zapis 33 položaja preklopke.
 
-**Redak 2 — impedancije i zvjezdište**
+**Žerjavinec**
 
-| Polje | T1 400 KONJS | T2 400 KONJS | T3 400 KONJS | T1 400 MELIN | T2 400 MELIN | T1 220 HE SE | T1 400 ZERJA |
-|---|---|---|---|---|---|---|---|
-| R1-2 | `5.82400E+05` | `5.82400E+05` | `5.82400E+05` | `5.82400E+05` | `5.82400E+05` | `5.10000E+05` | `5.82400E+05` |
-| X1-2 | `1.16701E-01` | `1.16701E-01` | `1.16701E-01` | `1.16701E-01` | `1.16701E-01` | `1.29299E-01` | `1.22201E-01` |
-| SBASE1-2 | `400.00` | `400.00` | `400.00` | `400.00` | `400.00` | `200.00` | `400.00` |
-| R2-3 | `2.33600E+05` | `2.33600E+05` | `2.33600E+05` | `2.33600E+05` | `2.33600E+05` | `2.24987E+05` | `2.42000E+05` |
-| X2-3 | `4.00000E-02` | `4.00000E-02` | `4.00000E-02` | `4.00000E-02` | `4.00000E-02` | `9.50002E-02` | `8.99995E-02` |
-| SBASE2-3 | `100.00` | `100.00` | `100.00` | `100.00` | `100.00` | `66.00` | `100.00` |
-| R3-1 | `2.37100E+05` | `2.37100E+05` | `2.37100E+05` | `2.37100E+05` | `2.37100E+05` | `2.24987E+05` | `2.36000E+05` |
-| X3-1 | `1.33500E-01` | `1.33500E-01` | `1.33500E-01` | `1.33500E-01` | `1.33500E-01` | `1.29300E-01` | `1.40000E-01` |
-| SBASE3-1 | `100.00` | `100.00` | `100.00` | `100.00` | `100.00` | `66.00` | `100.00` |
-| VMSTAR | `1.00119` | `1.00119` | `1.00120` | `0.95381` | `0.95381` | `0.96473` | `0.97288` |
-| ANSTAR | `127.0577` | `127.0577` | `127.0577` | `83.6743` | `83.6743` | `92.8033` | `87.0324` |
+- Ista vrsta zapisa kao Konjsko i Melina (granice napona), ali uži naponski pojas (1,00–1,04 p.u.)
+  i druga tablica (2); broj položaja (25) jednak je broju točaka tablice.
 
-**Redak 3 — namot 1**
+**Senj**
 
-| Polje | T1 400 KONJS | T2 400 KONJS | T3 400 KONJS | T1 400 MELIN | T2 400 MELIN | T1 220 HE SE | T1 400 ZERJA |
-|---|---|---|---|---|---|---|---|
-| WINDV1 | `412.500` | `412.500` | `412.500` | `400.000` | `400.000` | `230.562` | `400.663` |
-| NOMV1 | `400.000` | `400.000` | `400.000` | `0.000` | `400.000` | `220.000` | `400.000` |
-| ANG1 | `5.500` | `5.500` | `5.500` | `0.000` | `0.000` | `8.970` | `0.000` |
-| RATE1-1 | `400.00` | `400.00` | `400.00` | `0.00` | `400.00` | `200.00` | `400.00` |
-| RATE1-2 … RATE1-12 | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` |
-| COD1 | `-3` | `-3` | `-3` | `-3` | `-3` | `-3` | `-3` |
-| CONT1 | `60050` | `60050` | `60050` | `60067` | `60067` | `60157` | `60151` |
-| NOD1 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| RMA1 | `416.738` | `416.738` | `416.738` | `416.740` | `416.740` | `10.0000` | `416.000` |
-| RMI1 | `367.701` | `367.701` | `367.701` | `367.700` | `367.700` | `-6.3000` | `375.100` |
-| VMA1 | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `-190.00` | `1.04000` |
-| VMI1 | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `-195.00` | `1.00000` |
-| NTP1 | `33` | `33` | `33` | `33` | `33` | `25` | `25` |
-| TAB1 | `4` | `4` | `4` | `4` | `4` | `3` | `2` |
-| CR1 | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` |
-| CX1 | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` |
-| CNXA1 | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` |
+- Pravi kutni zapis: granice kuta i pojas toka.
+- **Gornja granica kuta je 10,0°, a Tablica 3 smjernica navodi +10,54°.**
+- **Donja granica −6,3° je izvan tablice korekcije**, koja počinje na −6,00°; za −6,3° vrijedi
+  rubni faktor F = 1.
 
-**Redak 4 — namot 2**
+**Gračac**
 
-| Polje | T1 400 KONJS | T2 400 KONJS | T3 400 KONJS | T1 400 MELIN | T2 400 MELIN | T1 220 HE SE | T1 400 ZERJA |
-|---|---|---|---|---|---|---|---|
-| WINDV2 | `231.000` | `231.000` | `230.999` | `231.000` | `231.000` | `115.000` | `231.000` |
-| NOMV2 | `220.000` | `220.000` | `220.000` | `0.000` | `220.000` | `110.000` | `220.000` |
-| ANG2 | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` |
-| RATE2-1 | `400.00` | `400.00` | `400.00` | `400.00` | `400.00` | `200.00` | `400.00` |
-| RATE2-2 … RATE2-12 | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` |
-| COD2 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| CONT2 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| NOD2 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| RMA2 | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` |
-| RMI2 | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` |
-| VMA2 | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` |
-| VMI2 | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` |
-| NTP2 | `33` | `33` | `33` | `33` | `33` | `33` | `33` |
-| TAB2 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| CR2 | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` |
-| CX2 | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` |
-| CNXA2 | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` |
-
-**Redak 5 — namot 3**
-
-| Polje | T1 400 KONJS | T2 400 KONJS | T3 400 KONJS | T1 400 MELIN | T2 400 MELIN | T1 220 HE SE | T1 400 ZERJA |
-|---|---|---|---|---|---|---|---|
-| WINDV3 | `31.5000` | `31.5000` | `30.0000` | `30.0000` | `31.5000` | `10.5000` | `10.5000` |
-| NOMV3 | `30.000` | `30.000` | `0.000` | `0.000` | `30.000` | `10.000` | `10.000` |
-| ANG3 | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` |
-| RATE3-1 | `100.00` | `100.00` | `100.00` | `0.00` | `100.00` | `66.00` | `100.00` |
-| RATE3-2 … RATE3-12 | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` | svi `0.00` |
-| COD3 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| CONT3 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| NOD3 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| RMA3 | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` |
-| RMI3 | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` |
-| VMA3 | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` | `1.10000` |
-| VMI3 | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` | `0.90000` |
-| NTP3 | `33` | `33` | `33` | `33` | `33` | `33` | `33` |
-| TAB3 | `0` | `0` | `0` | `0` | `0` | `0` | `0` |
-| CR3 | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` |
-| CX3 | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` | `0.00000` |
-| CNXA3 | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` | `0.000` |
-
-### Sabirnice priključka (zapisi iz sekcije BUS)
-
-| I | NAME | BASKV | IDE | AREA | ZONE | OWNER | VM | VA | NVHI | NVLO | EVHI | EVLO |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `80049` | `PST GRACAC` | `110.0000` | `4` | `16` | `3` | `403` | `1.00000` | `0.0000` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `60035` | `HGRACA51` | `110.0000` | `2` | `16` | `3` | `403` | `1.03246` | `121.5992` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `80050` | `PST GRACAC2` | `110.0000` | `1` | `16` | `3` | `403` | `1.03286` | `130.2825` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `60049` | `HKONJS11` | `400.0000` | `1` | `16` | `2` | `402` | `1.01015` | `123.8797` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `60050` | `HKONJS21` | `220.0000` | `1` | `16` | `2` | `402` | `1.03437` | `121.3321` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `23079` | `KONJSKO` | `30.0000` | `1` | `16` | `2` | `402` | `1.05125` | `127.0577` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `23080` | `KONJSKO` | `30.0000` | `1` | `16` | `2` | `402` | `1.05125` | `127.0577` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `23078` | `KONJSKO` | `30.0000` | `1` | `16` | `2` | `402` | `1.00120` | `127.0577` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `60066` | `HMELIN11` | `400.0000` | `1` | `16` | `3` | `403` | `0.93975` | `84.1146` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `60067` | `HMELIN21` | `220.0000` | `1` | `16` | `3` | `403` | `0.99216` | `83.9455` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `23047` | `MELINA` | `30.0000` | `1` | `16` | `3` | `403` | `0.95381` | `83.6743` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `23048` | `MELINA` | `30.0000` | `1` | `16` | `3` | `403` | `1.00150` | `83.6743` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `60109` | `HSENJ 21` | `220.0000` | `2` | `16` | `3` | `403` | `1.01666` | `96.9472` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `60157` | `HSENJ 51` | `110.0000` | `2` | `16` | `3` | `403` | `1.00949` | `93.5146` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `23065` | `HESENJ` | `10.0000` | `1` | `16` | `3` | `403` | `1.01296` | `92.8033` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `60150` | `HZERJA11` | `400.0000` | `1` | `16` | `1` | `401` | `1.01003` | `83.3166` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `60151` | `HZERJA21` | `220.0000` | `2` | `16` | `1` | `401` | `1.03235` | `85.9447` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-| `23039` | `ZERJAVINEC` | `10.0000` | `1` | `16` | `1` | `401` | `1.02152` | `87.0324` | `1.10000` | `0.90000` | `1.10000` | `0.90000` |
-
-### Tablice korekcije impedancije
-
-Tablice u datoteci: 1, 2, 3, 4; korištene: 1, 2, 3, 4. Imaginarni dio faktora je `0.00000` u svim točkama svih tablica.
-
-| Točka | Tab. 1: T [°] | Tab. 1: Re F | Tab. 2: T [°] | Tab. 2: Re F | Tab. 3: T [°] | Tab. 3: Re F | Tab. 4: T [°] | Tab. 4: Re F |
-|---|---|---|---|---|---|---|---|---|
-| 1 | `-30.00` | `1.00000` | `-4.48` | `1.00000` | `-6.00` | `1.00000` | `-5.40` | `1.00000` |
-| 2 | `-28.12` | `0.88135` | `-4.19` | `0.98620` | `-5.93` | `0.97780` | `-5.05` | `0.98610` |
-| 3 | `-26.25` | `0.76970` | `-3.89` | `0.97250` | `-5.53` | `0.95560` | `-4.69` | `0.97220` |
-| 4 | `-24.38` | `0.66532` | `-3.57` | `0.95870` | `-5.10` | `0.93340` | `-4.30` | `0.95830` |
-| 5 | `-22.50` | `0.56810` | `-3.24` | `0.94500` | `-4.65` | `0.91110` | `-3.91` | `0.94440` |
-| 6 | `-20.62` | `0.47840` | `-2.89` | `0.93120` | `-4.18` | `0.88890` | `-3.48` | `0.93060` |
-| 7 | `-18.75` | `0.39612` | `-2.52` | `0.91740` | `-3.67` | `0.86670` | `-3.04` | `0.91670` |
-| 8 | `-16.88` | `0.32140` | `-2.14` | `0.90370` | `-3.14` | `0.84450` | `-2.58` | `0.90280` |
-| 9 | `-15.00` | `0.25433` | `-1.75` | `0.88990` | `-2.57` | `0.82230` | `-2.11` | `0.88890` |
-| 10 | `-13.12` | `0.19499` | `-1.33` | `0.87620` | `-1.98` | `0.80010` | `-1.60` | `0.87500` |
-| 11 | `-11.25` | `0.14342` | `-0.91` | `0.86240` | `-1.35` | `0.77780` | `-1.10` | `0.86110` |
-| 12 | `-9.38` | `0.09970` | `-0.46` | `0.84870` | `-0.69` | `0.75560` | `-0.55` | `0.84720` |
-| 13 | `-7.50` | `0.06386` | `0.00` | `0.83490` | `0.00` | `0.73340` | `0.00` | `0.83330` |
-| 14 | `-5.63` | `0.03594` | `0.48` | `0.83000` | `0.72` | `0.73410` | `0.64` | `0.82780` |
-| 15 | `-3.75` | `0.01598` | `0.97` | `0.82510` | `1.48` | `0.73470` | `1.29` | `0.82220` |
-| 16 | `-1.88` | `0.00400` | `1.48` | `0.82020` | `2.26` | `0.73540` | `1.97` | `0.81670` |
-| 17 | `0.00` | `0.00010` | `2.01` | `0.81530` | `3.08` | `0.73610` | `2.68` | `0.81110` |
-| 18 | `1.88` | `0.00400` | `2.55` | `0.81040` | `3.92` | `0.73670` | `3.39` | `0.80560` |
-| 19 | `3.75` | `0.01600` | `3.11` | `0.80550` | `4.80` | `0.73740` | `4.14` | `0.80000` |
-| 20 | `5.63` | `0.03590` | `3.69` | `0.80060` | `5.70` | `0.73800` | `4.91` | `0.79440` |
-| 21 | `7.50` | `0.06390` | `4.28` | `0.79570` | `6.63` | `0.73870` | `5.70` | `0.78890` |
-| 22 | `9.38` | `0.09970` | `4.88` | `0.79080` | `7.58` | `0.73940` | `6.50` | `0.78330` |
-| 23 | `11.25` | `0.14340` | `5.49` | `0.78590` | `8.55` | `0.74000` | `7.31` | `0.77780` |
-| 24 | `13.12` | `0.19500` | `6.12` | `0.78100` | `9.54` | `0.74070` | `8.15` | `0.77222` |
-| 25 | `15.00` | `0.25430` | `6.76` | `0.77610` | `10.54` | `0.74130` | `9.00` | `0.76670` |
-| 26 | `16.88` | `0.32140` |  |  |  |  |  |  |
-| 27 | `18.75` | `0.39610` |  |  |  |  |  |  |
-| 28 | `20.62` | `0.47840` |  |  |  |  |  |  |
-| 29 | `24.38` | `0.66530` |  |  |  |  |  |  |
-| 30 | `26.25` | `0.76970` |  |  |  |  |  |  |
-| 31 | `28.12` | `0.88140` |  |  |  |  |  |  |
-| 32 | `30.00` | `1.00000` |  |  |  |  |  |  |
-| **Broj točaka** | **32** |  | **25** |  | **25** |  | **25** | 
-
-| Tablica | Broj točaka | Koriste je |
-|---|---|---|
-| 1 | 32 | PST GRACAC  - VP VELEBIT, PST GRACAC  - VP LICKI OSIK |
-| 2 | 25 | T1 400 ZERJA |
-| 3 | 25 | T1 220 HE SE |
-| 4 | 25 | T1 400 KONJS, T2 400 KONJS, T3 400 KONJS, T1 400 MELIN, T2 400 MELIN |
+- Dva dvonamotna PST-a prema sabirnici HGRACA51: VP Velebit **izvan pogona** (kut 18°) i
+  VP Lički Osik u pogonu (kut 9°).
+- Impedancija u nultom položaju praktički nestaje (F = 0,0001), a raste s kutom: pri 9° je
+  u<sub>k</sub> = 0,79 %.
+- Tablica ima 32 točke uz 33 položaja: nedostaje +22,5° (−22,5° postoji).
+- Jedini PST-ovi s magnetiziranjem u zapisu (oko 40,5 kW gubitaka u željezu).
