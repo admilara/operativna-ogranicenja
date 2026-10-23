@@ -1,0 +1,4 @@
+# Podaci o spremniku po projektu (Owner 3). Kopirati u hybrid_storage.csv i popuniti.
+# p_bs_mw = snaga punjenja, e_bs_mwh = kapacitet, eta = ucinkovitost punjenje-praznjenje,
+# t_event_h = trajanje dogadaja ogranicenja za konzervativnu procjenu
+project_o3,p_bs_mw,e_bs_mwh,eta,t_event_h
