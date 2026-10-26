@@ -1,20 +1,17 @@
 # 2. PST i korekcija impedancije
 
 > [!WARNING]
-> **Modeliranje PST-ova u alatu je zasad samo kutno i nije točno.**
-> Stvarni PST-ovi u sustavu — barem dio njih; koji, tek treba provjeriti — imaju
-> **dijagonalnu (kosu) regulaciju**: jedna preklopka istodobno mijenja i kut i modul
-> napona. Model, kao i isporučeni `.raw`, kut i omjer prijenosa zadaje kao dvije neovisne
-> veličine. Zato su rezultati koji ovise o promjeni kuta PST-a (optimizacija kutova po
-> scenariju, §2.7) **samo približni**. Model treba revidirati čim budu dostupne tablice po
-> položajima preklopke (modul napona, kut i impedancija za svaki položaj) — alat za to već ima
-> predviđenu opciju (§2.8).
+> **Modeliranje PST-ova u alatu je zasad samo kutno i nije skroz točno.**
+> U Hrvatskom sustavu neki phase shifteri imaju — imaju **kosu regulaciju**: jedna preklopka istodobno 
+> mijenja i kut i postavnu vrijednost napona. Model, kao i isporučeni `.raw`, kut i omjer napona zadaje kao dvije neovisne
+> veličine. Zato rezultati koji ovise o promjeni kuta PST-a (optimizacija kutova po
+> scenariju, §2.7) **nisu egzaktni**. Model treba revidirati da uključuje i promjenu postavne vrijendosti napona tamo gdje ona postoji!! 
 >
 > Zahtjev smjernica da se PST-ovi istodobno drže u naponskoj regulaciji i podešavaju po kutu
-> kod dijagonalne regulacije nije ostvariv, a isporučeni modeli za to nemaju podatke —
+> kod kose regulacije nije ostvariv te su dostavljeni modeli u tom smislu manjkavi —
 > vidi [Nedostaci smjernica, N1](../nedostaci-smjernica.md).
 
-Osnovni podaci i tablice korekcije svih PST-ova u modelu: [Prilog A](prilog-pst-zapisi.md).
+Osnovni podaci i tablice impedancije svih PST-ova u modelu: [Prilog A](prilog-pst-zapisi.md).
 
 ## 2.1 Što PST radi
 
@@ -25,12 +22,12 @@ naponima $U_1\angle\delta_1$ i $U_2\angle\delta_2$:
 $$P_{12} \approx \frac{U_1 U_2}{X}\,\sin(\delta_1 - \delta_2 + \alpha).$$
 
 Promjenom $\alpha$ PST preusmjerava djelatnu snagu između paralelnih putova — zato je prva mjera
-u postupku smjernica (Slika 2) promjena postavki raspoloživih PST-ova.
+u postupku smjernica (Slika 2) promjena postavnih vrijednosti raspoloživih PST-ova.
 
-## 2.2 Tablice korekcije impedancije u PSS/E-u
+## 2.2 Impedantne tablice u PSS/E-u
 
 Serijska impedancija PST-a ovisi o položaju preklopke. PSS/E to opisuje **tablicom korekcije
-impedancije** (Impedance Correction Table): za namot s kontrolom kuta (|COD| = 3) tablica daje
+impedancije** (Impedance Correction Table): za namot s kontrolom zakreta kuta (|COD| = 3) tablica daje
 faktor $F$ kao funkciju kuta u stupnjevima, a PSS/E linearno interpolira:
 
 $$Z(\alpha) = F(\alpha)\cdot Z_{nom},\qquad
@@ -65,9 +62,9 @@ $u_k = 100\,z\,F(\alpha)$, $u_{kr} = 100\,r\,F(\alpha)$. Nazivne vrijednosti ($F
 stupcima `psse_vk_nom`, `psse_vkr_nom`, a broj tablice u `psse_tab1` — iz toga se impedancija
 može ponovno izračunati za bilo koji kut.
 
-## 2.4 Tronamotni PST — korekcija u modelu zvijezde
+## 2.4 Tronamotni PST — korekcija u spoju zvijezde
 
-### Model zvijezde
+### Spoj zvijezda
 
 PSS/E tronamotni transformator opisuje trima impedancijama parova namota $Z_{12}$, $Z_{23}$,
 $Z_{31}$ (svaka na svojoj nazivnoj snazi para), a računa s **ekvivalentnom zvijezdom**:
@@ -115,8 +112,7 @@ $S_B = 100$ MVA:
 | $Z_2$ | $0{,}00016 - j\,0{,}03219$ |
 | $Z_3$ | $0{,}00217 + j\,0{,}07212$ |
 
-Negativna reaktancija $Z_2$ uobičajena je kod autotransformatora — posljedica je zajedničkog
-namota, a ne greška u podacima.
+Negativna reaktancija $Z_2$ posljedica je zajedničkog namota kod autotransformatora, ne radi se o grešci u podacima.
 
 **Korak 3 — faktor.** Kut 5,5° leži između točaka tablice 4,91° ($F = 0{,}7944$) i 5,70°
 ($F = 0{,}7889$):
@@ -135,13 +131,13 @@ Smanjenje $Z_1$ za 21 % daje smanjenje impedancije 400–220 kV za 44 %, jer je
 $Z_{12} = Z_1 + Z_2$, a $Z_2$ je negativna. Zbog toga pogrešno postavljena korekcija ima
 velik učinak na tokove kroz Konjsko.
 
-### Provjera na podacima
+### Provjera
 
 Mjesto primjene faktora nije dokumentirano u isporučenim podacima pa je utvrđeno usporedbom sa
-spremljenim PSS/E rješenjem (najveća neusklađenost snage na sabirnici, model A-2029; sve ostalo
+spremljenim PSS/E rješenjem (najveće odstupanje u slack čvorištu, model A-2029; sve ostalo
 nepromijenjeno, uključujući korekciju na dvonamotnim PST-ovima):
 
-| Primjena faktora $F$ | Najveća neusklađenost |
+| Primjena faktora $F$ | Najveće odstupanje |
 |---|---|
 | nigdje | 4794 MW |
 | samo na $Z_{12}$ | 856 MW |
@@ -153,7 +149,7 @@ nepromijenjeno, uključujući korekciju na dvonamotnim PST-ovima):
 
 Ni predznak kuta nije preuzet "po definiciji", nego provjeren:
 
-| Element | pandapower | Neusklađenost uz suprotni predznak |
+| Element | pandapower | Odstupanje uz suprotni predznak |
 |---|---|---|
 | `trafo` | `shift_degree = +ANG1` | — |
 | `trafo3w` | `shift_mv_degree = shift_lv_degree = +ANG1` | reda veličine GW |
