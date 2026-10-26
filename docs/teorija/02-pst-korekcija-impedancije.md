@@ -66,8 +66,8 @@ može ponovno izračunati za bilo koji kut.
 
 ### Spoj zvijezda
 
-PSS/E tronamotni transformator opisuje trima impedancijama parova namota $Z_{12}$, $Z_{23}$,
-$Z_{31}$ (svaka na svojoj nazivnoj snazi para), a računa s **ekvivalentnom zvijezdom**:
+PSS/E tronamotni transformator opisuje trima impedancijama između parova namota $Z_{12}$, $Z_{23}$,
+$Z_{31}$ (svaka definirana prema nazivnoj snazi $S_{nm}$), a računa s **ekvivalentnom zvijezdom**:
 
 $$
 Z_1 = \tfrac12\left(Z_{12} + Z_{31} - Z_{23}\right),\quad
@@ -156,17 +156,42 @@ Ni predznak kuta nije preuzet "po definiciji", nego provjeren:
 
 ## 2.6 Kako su PST zapisi kodirani u isporučenim modelima
 
-| Transformator | COD1 | RMA / RMI | VMA / VMI | CONT | Tumačenje |
-|---|---|---|---|---|---|
-| Gračac (2×) | −3 | +30 / −30 | +150 / −150 | vlastita sabirnica | pravi kutni zapis: granice kuta [°] i toka [MW] |
-| Senj T1 | −3 | +10 / −6,3 | −190 / −195 | 60157 | pravi kutni zapis (raspon iz Tablice 3) |
-| Konjsko T1–T3 | −3 | 416,738 / 367,701 | 1,1 / 0,9 | 60050 (220 kV) | **polja popunjena za regulaciju napona**: granice u kV, napon u p.u. |
-| Melina T1–T2 | −3 | 416,74 / 367,7 | 1,1 / 0,9 | 60067 (220 kV) | isto |
-| Žerjavinec T1 | −3 | 416,0 / 375,1 | 1,04 / 1,0 | 60151 (220 kV) | isto |
+| Transformator | COD1       | RMAX / RMIN 		 | VMAX / VMIN | CONT 									 | Tumačenje |
+|---------------|------------|-------------------|-------------|-----------------------------------------|-----------|
+| Gračac (2×)   | −3   		 | +30 / −30   		 | +150 / −150 | vlastita sabirnica 					 | pravi kutni zapis: granice kuta [°] i toka [MW] |
+| Senj T1 	    | −3  		 | +10 / −6,3 	 	 | −190 / −195 | 60157   	   							 | pravi kutni zapis (raspon iz Tablice 3) |
+| Konjsko T1–T3 | −3   		 | 416,738 / 367,701 | 1,1 / 0,9   | 60050 (220 kV) 						 | **polja popunjena za regulaciju napona**: granice u kV, napon u p.u. |
+| Melina T1–T2  | −3   		 | 416,74 / 367,7  	 | 1,1 / 0,9   | 60067 (220 kV) 						 | isto |
+| Žerjavinec T1 | −3   		 | 416,0 / 375,1 	 | 1,04 / 1,0  | 60151 (220 kV) 						 | isto |
 
-Kod autotransformatora 400/220 kV granice RMA/RMI su **naponi namota 400 kV**, jer se zbog
-dijagonalne regulacije napon mijenja s kutom. U modelima je `PHSHFT=0` i `ACTAPS=0`, pa PSS/E
-ta polja ionako ne koristi — kut i omjer su zaključani na vrijednostima iz zapisa.
+Kako funkcionira modeliranje phase shiftera u PSS/E?
+- Jedan od osnovnih parametara je COD1 - **transformer control code** za automatsko prilagođavanje 
+preklopke ili kuta namota transformatora tijekom proračuna tokova snaga. 
+	- 0 - nema upravljanja
+	- $\pm1$ - upravljanje naponom
+	- $\pm2$ - upravljanje tokom jalove snage
+	- $\pm3$ - upravljanje tokom radne snage
+- Ako se unese pozitivna vrijednost, automatsko djelovanje regulacije odabranog namota je uključeno kada je
+u postavkama proračuna tokova snaga uključena odgovarajuća opcija
+- Ako se unese negativna vrijednost, automatsko djelovanje je 'nadjačano' postavkama proračuna tokova snaga
+- RMA1/RMI1 su gornja i donja granica, koja se razlikuje ovisno o COD1:
+	- Maksimalni i minimalni napon u p.u. kad je COD1=1 ili 2, a CW=1, RMA1=1.1, RMI1=0.9.
+	- Maksimalni i minimalni napon u kV kad je COD1=1 ili 2, a CW=2. Nema default vrijednosti.
+	- Maksimalni i minimalni iznos zakreta kuta kada je COD1=3. Nema default vrijednosti.
+	- Ne koristi se kada je COD1=0
+- VMA1/VMI1 su gornja i donja granica, koja se razlikuje ovisno o COD1:
+	- Iznos napona na reguliranim sabirnicama u p.u. kad je COD1=1. Nema default vrijednosti.
+	- Tok jalove snage u transformator u Mvar kad je COD1=2. Nema default vrijednosti.
+	- Tok radne snage u transformator u MW kad je COD1=3. Nema default vrijednosti.
+
+[!WARNING]
+> **Što je problematično?**
+> Problem sa svim ovim je to je kod transformatora sa kosom regulacijom u ovakvom obliku
+> nemoguće zadati pravilnu promjenu kuta i iznosa napona. COD1 je već u startu pogrešan jer |3| implicira
+> upravljanje tokom radne snage i očekuje se unošenje opsega zakreta kuta. A kako takve informacije nije 
+> moguće implementirati u PSS-u korištenjem samo impedantnih tablica, postavlja se pitanje zašto se uopće 
+> forsira "detaljnije" modeliranje PST-a kada je ono opet pogrešno? Da ne spominjemo 33 položaja za naponsku preklopku.
+
 
 ## 2.7 Kutovi PST-ova po scenariju
 
@@ -174,17 +199,19 @@ Smjernice (§3.1.1) traže:
 
 - PST-ovi se postavljaju u naponsku regulaciju, a kutevi se podešavaju tako da u mreži bude
   najmanje preopterećenja, s prednošću mreži 400 kV i 220 kV;
-- kut se bira **jednom po scenariju** unutar raspona iz Tablice 3 i **ne mijenja** se između
+- kut se bira **jednom po scenariju** unutar raspona iz impedantnih tablica i **ne mijenja** se između
   osnovnog stanja i N-1 slučajeva;
 - Divača: 30° u referentnom modelu i bez promjene (u isporučenom izvatku Divača ne postoji).
 
-Alat zasad radi **samo kutno**: mijenja kut i, preko tablice korekcije, impedanciju, a omjer
-prijenosa (WINDV) ostavlja kakav je u modelu. Kod dijagonalne regulacije kut i modul napona
-dolaze iz istog položaja preklopke, pa to nije fizikalno točno (v. upozorenje na vrhu).
+Trenutno je implementirana jedino promjena kuta u analizi - za svaku promjenu zakreta kuta, preko
+tablice korekcije impedancije se mijenja impedancija namota. Naponski omjer se očito onda samostalno 
+postavlja na neki od 33 položaja (!) unutar raspona RMA1 i RMI1.
 
-### Dokaz da tablice odgovaraju dijagonalnoj regulaciji
+** Peti put ponavljamo, kod kose regulacije kut i modul napona dolaze iz istog položaja preklopke, pa to nije fizikalno točno.**
 
-Kod dijagonalnog regulatora svaki položaj $n$ dodaje napon stalnog iznosa $\delta$ pod stalnim
+### Dokaz da tablice odgovaraju kosoj regulaciji
+
+Kod kose regulacije svaki položaj $n$ dodaje napon stalnog iznosa $\delta$ pod stalnim
 kutom $\theta$ prema glavnom naponu:
 
 $$\underline{U}(n) = U_0\left(1 + n\,\delta\,e^{j\theta}\right),\qquad
@@ -193,23 +220,18 @@ $$\underline{U}(n) = U_0\left(1 + n\,\delta\,e^{j\theta}\right),\qquad
 Kut se zato s položajem mijenja **nejednoliko**. Prilagodba ovog modela na točke tablica
 (25 točaka, $n = -12 \dots +12$):
 
-| Tablica | Korak kuta na početku → na kraju | RMS pogreška prilagodbe |
-|---|---|---|
-| 2 (Žerjavinec) | 0,29° → 0,64° | 0,04° |
-| 3 (Senj) | 0,40° → 1,00° | 0,13° |
-| 4 (Konjsko, Melina) | 0,35° → 0,85° | 0,10° |
+| Tablica 			  | Korak kuta na početku → na kraju | RMS pogreška prilagodbe |
+|---------------------|----------------------------------|-------------------------|
+| 2 (Žerjavinec) 	  | 0,29° → 0,64° 					 | 0,04° 				   |
+| 3 (Senj) 		  	  | 0,40° → 1,00° 					 | 0,13° 				   |
+| 4 (Konjsko, Melina) | 0,35° → 0,85° 					 | 0,10° 				   |
 
-Tablice su dakle konzistentne s dijagonalnom regulacijom. **Iz `.raw`-a se ipak ne može
-rekonstruirati modul napona po položaju**: model s jednim dodatnim naponom daje promjenu modula
-od ±20–25 % na krajnjim položajima, što se ne slaže s granicama 367,7–416,7 kV. Stvarna
-izvedba (regulacijski namot na zvjezdištu autotransformatora) mijenja oba napona namota na
-način koji iz ovih podataka nije vidljiv — za to trebaju tablice proizvođača.
 
 ## 2.8 Opcija točnijeg modeliranja: tablica po položajima
 
 Kad budu dostupni podaci po položajima, zadaju se u CSV datoteci (postavka `PST_TAP_TABLE` u
 `scripts/build_model.py`). Svaki redak opisuje **jedan položaj preklopke** — napon namota 1,
-kut i impedanciju zajedno, što je upravo priroda dijagonalnog regulatora:
+kut i impedanciju zajedno, što je upravo priroda kose regulacije:
 
 ```
 transformer,step,u_w1_kv,angle_deg,z_factor
@@ -233,6 +255,4 @@ one bez tablice.
 > [!NOTE]
 > pandapower ima i ugrađeni mehanizam za ovo (`net.trafo_characteristic_table`,
 > `tap_changer_type="Tabular"`), koji vrijednosti uzima točnim podudaranjem po položaju.
-> Alat ga zasad ne koristi: vlastita izvedba je jednostavnija, ista je za dvonamotne i
-> tronamotne transformatore i provjerena je testom (tablica koja opisuje trenutno stanje ne
-> mijenja nijedan parametar).
+> Trenutno se ne koristi jer je za ovako mali broj PST-a implementirana jednostavnija izvedba preko gore navedene tablice. 
