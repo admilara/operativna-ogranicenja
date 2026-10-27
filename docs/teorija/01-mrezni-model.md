@@ -116,18 +116,6 @@ zaključano na granici, pa su naponi do 3 % drukčiji. Petlja alata daje isto rj
    "pogrešnu" stranu ($Q = Q_{\max}$ i $U > U_{zad}$, odnosno $Q = Q_{\min}$ i $U < U_{zad}$).
 4. Ponavlja se dok nema promjena.
 
-> [!IMPORTANT]
-> **Granice jalove snage pri ograničenju snage — otvoreno pitanje.** Budući da su granice
-> zadane kao $\pm 0{,}3287\,P_G$, treba odlučiti što se s njima događa kad se korisniku smanji
-> djelatna snaga (pogl. 5):
->
-> - **preračunati ih** na novu $P_G$ (cos φ = 0,95 i dalje) — dosljedno načinu na koji su izrađeni
->   ulazni modeli, ali korisnik s manjom snagom tada ima i manju naponsku potporu;
-> - **zadržati ih** na vrijednosti prije ograničenja — bliže NC RfG, prema kojem se raspon jalove
->   snage elektrane definira prema $P_{\max}$, a ne prema trenutnoj snazi.
->
-> Izbor utječe na napone i, preko jalove snage, na struju (opterećenje) vodova uz korisnika.
-
 ## 1.4 Referentno čvorište (slack bus)
 
 Za proračun tokova snaga nužno je da znamo sve injekcije radne snage i terete prije provođenja
