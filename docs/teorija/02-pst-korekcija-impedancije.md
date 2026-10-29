@@ -7,8 +7,8 @@
 > veličine. Zato rezultati koji ovise o promjeni kuta PST-a (optimizacija kutova po
 > scenariju, §2.7) **nisu egzaktni**. Model treba revidirati da uključuje i promjenu postavne vrijendosti napona tamo gdje ona postoji!! 
 >
-> Zahtjev smjernica da se PST-ovi istodobno drže u naponskoj regulaciji i podešavaju po kutu
-> kod kose regulacije nije ostvariv te su dostavljeni modeli u tom smislu manjkavi —
+> Zahtjev smjernica da se PST-ovi istodobno drže u naponskoj regulaciji i ne podešavaju po kutu
+> (nakon prvog postavljanja) kod transformatora sa kosom regulacijom nije ostvariv te su dostavljeni modeli u tom smislu manjkavi —
 > vidi [Nedostaci smjernica, N1](../nedostaci-smjernica.md).
 
 Osnovni podaci i tablice impedancije svih PST-ova u modelu: [Prilog A](prilog-pst-zapisi.md).
