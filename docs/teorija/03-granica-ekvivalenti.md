@@ -69,7 +69,7 @@ nam radi razliku i zbog čega promatramo nekoliko varijacija na temu - Ward, pro
 
 ### Wardov ekvivalent
 
-Kako smo rekli, sabirnice se razdvajaju u tri kategorije - unutarnje ($I$), granične ($B$) i vanjske ($E$).
+Kako smo rekli, sabirnice se razdvajaju u tri kategorije - unutarnje $I$, granične $B$ i vanjske $E$.
 Linearne jednadžbe vanjskog dijela (vrijede i za ostale metode) :
 
 $$
@@ -82,18 +82,20 @@ gdje je $\mathbf{I}$ vektor injektiranih struja, a $\mathbf{U}$ vektor napona na
 Jednadžbe se rješavaju za dobiti napon vanjskih sabirnica $\mathbf{U}_{E}$.
 
 $$
-\mathbf{U}_(E} = \mathbf{Y}_{EE}^{-1}(\mathbf{I}_{E}-\mathbf{Y}_{EB}\mathbf{U}_{B}
+\mathbf{U}_{E} = \mathbf{Y}_{EE}^{-1}\left(\mathbf{I}_{E}-\mathbf{Y}_{EB}\mathbf{U}_{B}\right)
 $$
 
 Supstituiramo taj izraz u prvu linearnu jednadžbu:
 
 $$
-(\mathbf{Y}_{BB}-\mathbf{Y}_{BE}\mathbf{Y}_{EE}^{-1}\mathbf{Y}-{EB})\mathbf{U}_{B} = \mathbf{I}-\mathbf{Y}_{BE}\mathbf{Y}_{EE}^{-1}\mathbf{I}_{E}
+\left(\mathbf{Y}_{BB}-\mathbf{Y}_{BE}\mathbf{Y}_{EE}^{-1}\mathbf{Y}_{EB}\right)\mathbf{U}_{B} = \mathbf{I}-\mathbf{Y}_{BE}\mathbf{Y}_{EE}^{-1}\mathbf{I}_{E}
 $$
 
-Vanjske sabirnice uklanjaju se Gaussovom eliminacijom (Kronova redukcija):
+Vanjske sabirnice uklanjaju se Gaussovom eliminacijom $E$ čvorišta (Kronova redukcija):
 
 $$\mathbf{Y}_{eq} = \mathbf{Y}_{BB} - \mathbf{Y}_{BE}\,\mathbf{Y}_{EE}^{-1}\,\mathbf{Y}_{EB},$$
+
+- $\mathbf{Y}_{eq}$ se naziva još i Schurov komplement od $\mathbf{Y}_{EE}$. 
 
 $$\mathbf{I}_{B,eq} = -\mathbf{Y}_{BE}\,\mathbf{Y}_{EE}^{-1}\,\mathbf{I}_E,\qquad
 \mathbf{I}_E = \left(\frac{\mathbf{S}_E}{\mathbf{U}_E}\right)^{*}\ \text{(osnovno stanje)}.$$
@@ -101,15 +103,75 @@ $$\mathbf{I}_{B,eq} = -\mathbf{Y}_{BE}\,\mathbf{Y}_{EE}^{-1}\,\mathbf{I}_E,\qqua
 Rezultat na granici:
 
 - **ekvivalentne grane između svakog para graničnih sabirnica** — $\mathbf{Y}_{eq}$ je puna
-  matrica. To je najvažniji dio: izvandijagonalni članovi opisuju paralelne putove *kroz*
-  susjedne sustave, koji preuzimaju dio toka kad unutar Hrvatske ispadne element;
+  matrica. To je najvažniji dio: vandijagonalni članovi opisuju paralelne putove *kroz*
+  susjedne sustave, između sabirnica $i$ i $j$, koji preuzimaju dio toka kad unutar Hrvatske dođe do ispada;
 - **poprečne admitancije** na graničnim sabirnicama (dijagonala);
 - **injekcije** na graničnim sabirnicama, $\mathbf{S}_{B,eq} = \mathbf{U}_B\,\mathbf{I}_{B,eq}^{*}$,
-  koje u osnovnom stanju točno reproduciraju razmjene.
+  koje u osnovnom stanju točno reproduciraju razmjene;
+- matrica može biti nesimetrična ukoliko vanjski sustav sadrži phase shiftere.
 
-Slabost: vanjski generatori i tereti postaju stalne struje (odnosno stalne snage na granici).
-Vanjski sustav nema regulaciju napona ni jalovu rezervu, a točnost opada s udaljenošću od
+Minusi Wardovog ekvivalenta: vanjski generatori i tereti su stalne injekcije struje (tj. stalne snage na granici).
+Vanjski sustav nema regulaciju napona ni rezerve jalove snage, a točnost opada s udaljenošću od
 osnovnog stanja.
+
+### Fizikalno značenje ekvivalentnih grana
+ 
+Vandijagonalni član nakon eliminacije je
+ 
+$$Y_{eq,ij}=Y_{BB,ij}-\sum_{k,l\in E}Y_{BE,ik}\,\big(\mathbf Y_{EE}^{-1}\big)_{kl}\,Y_{EB,lj}.$$
+ 
+To je **prijenosna admitancija**: koliko struje se pojavi u sabirnici $i$ po voltu narinutom
+na sabirnicu $j$, kroz sve vanjske putove, uključujući i putove preko poprečnih elemenata prema
+zemlji. Prikaz te veličine kao grane $y_{ij}=-Y_{eq,ij}$ standardni je π-prikaz — 
+**ekvivalentna grana nije vodič**. Svaki fizički element vanjske mreže ima
+$\mathrm{Re}\,z\ge 0$, ali $Y_{eq,ij}$ je **omjer umnožaka** tih elemenata, a umnošci i
+kvocijenti kompleksnih brojeva različitih kutova mogu završiti u bilo kojem kvadrantu - tako da ta
+vrijednost može biti **pozitivna ili negativna**. Najjednostavniji primjer je pretvorba zvijezde u trokut. 
+
+
+**Ukupni gubici ostaju točni.** Kronova redukcija čuva ponašanje vanjske mreže gledano s
+rubnih čvorišta: za iste napone dobivaju se iste struje kao u izvornoj pasivnoj
+mreži, pa je ukupna snaga koju ekvivalent troši za bilo koje napone jednaka izvornoj i $\ge 0$.
+Umjetna je samo podjela na grane i poprečne elemente — grana s negativnim R uvijek je
+kompenzirana susjednim granama i poprečnim elementima. Zato gubici na pojedinom fiktivnom
+elementu nemaju značenje, što je, uz nepostojanje nazivne vrijednosti, još jedan razlog da
+fiktivni elementi ne ulaze u N-1 ni u nadzor opterećenja.
+ 
+> [!NOTE]
+> **Koliko je to često?** U Wardovu ekvivalentu poprečni elementi s negativnom vodljivošću su
+> uobičajeni, osobito u admitancijskom obliku (generatori pretvoreni u admitancije
+> $y = S^*/\lvert U\rvert^2$ imaju negativnu vodljivost). Grane s negativnim R ili kapacitivnim X
+> moguće su, ali nisu tipičan ishod.
+
+
+### **Što se događa s generatorima i teretima?**
+Kronova redukcija točna je samo za potpuno linearne sustave. Tereti i generatori su
+nelinearni elementi i oni injektiraju stalnu snagu, a ne stalnu struju. Ideja Wardovog 
+ekvivalenta je da se koristi na **rješenom baznom slučaju** tako da se svaka vanjska injekcija
+može pretvoriti u rubni uvjet. Dva načina na koji se to postiže su:
+
+| Varijanta | Vanjska injekcija | Što se dogodi? |
+|---|---|---|
+| Wardova injekcija | konstantna struja (iz base-case napona) | ekvivalentne injekcije snage u rubnim čvorištima |
+| Wardova admitancija | konstantna admitancija | 'apsorbira' se u $\mathbf{Y}_{EE}$ tako da je $\mathbf{I}_{E} = 0$. Ostaju ekvivalentni shuntovi na rubovima. |
+
+Razlika je u odzivu na promjenu u unutarnjem sustavu. 
+- Wardova injekcija - vanjski sustav je konstantna injekcija. S obzirom da iznos ovisi o naponu u rubnom
+čvorištu, u slučaju ispada nekog elementa mijenjaju se **kutovi i naponi graničnih čvorišta**, a time onda
+i tokovi po ekvivalentnim granama. Bilanca djelatne snage u graničnoj sabirnici $i$ je:
+
+$$P_{pv,i}=P_{inj,i}-P_{lok,i}-P_{sh,i}(U_i)-\sum_j P_{ij},\qquad
+P_{ij}\approx\frac{\theta_i-\theta_j}{x_{ij}},$$
+
+gdje su: 
+- $P_{pv,i}$ tok prekograničnim vodom prema unutarnjoj mreži, 
+- $P_{inj,i}$ Wardova injekcija, 
+- $P_{lok,i}$ teret ili proizvodnja priključeni na samu sabirnicu, a 
+- $P_{sh,i}$ snaga ekvivalentnog poprečnog elementa.
+
+Dakle, **Wardova injekcija je stalna**, a **kutovi $\theta_i$, $\theta_j$ i iznos napona $U_i$ se mijenjaju, 
+što mijenja i tokove. Kod stalnih PQ injekcija na X-čvorištima, rubno čvorište ima samo impedanciju tog prekograničnog voda
+i injekciju, što ne dopušta da se tokovi mijenjaju. 
 
 ### Prošireni Wardov ekvivalent (xWard)
 
