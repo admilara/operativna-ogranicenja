@@ -3,22 +3,23 @@
 ## 3.1 Problem
 
 Isporučeni modeli sadrže **samo hrvatski podsustav**. Prekogranični vodovi završavaju u
-X-čvorištima, a mreže susjednih sustava (BA, SI, HU, RS, ME) nema. Treba odlučiti čime se
-nadomješta ono što je s druge strane granice.
+X-čvorištima, a mreža susjednih sustava (BA, SI, HU, RS, ME) modelirana je kao konstantna PQ injekcija. 
+Takav način ekvivalentiranja je okej za jednostavne tokove snaga, ali kada se u priču ubace N-1 i
+proračuni operativnih ograničenja, imamo neke manjkavosti. U ovom dijelu istražujemo na koji 
+način se vanjski sustavi mogu modelirati (bar u pandapoweru) da služe svrsi u svim ovim slučajevima i 
+što zapravo ovakav način modeliranja znači za konačne rezultate.
 
-Trenutna odluka: **razmjene na X-čvorištima zadaju se kao stalne PQ injekcije** iz spremljenog
-rješenja (pogl. 1, §1.6). Ovo poglavlje opisuje što to znači za rezultate i koje bi bolje
-rješenje bilo moguće kad bi bio dostupan model susjednih sustava.
+Trenutno stanje: **razmjene na X-čvorištima zadaju se kao stalne PQ injekcije** iz spremljenog
+rješenja (v. §1.6). O
 
 ## 3.2 Stalne PQ injekcije na X-čvorištima
 
-### Što je točno
+### Što je dobro
 
 U osnovnom stanju scenarija model je točan: tokovi na svim prekograničnim vodovima su upravo
-oni iz modela HOPS-a, što odgovara načinu na koji su scenariji definirani (Prilog 5 propisuje
-razmjenu po vodu).
+oni iz dostavljenog modela, što odgovara razmjenama po vodovima koji su naveni u tablici u Smjernicama.
 
-### Što nije točno
+### Što je manje dobro
 
 Stalna injekcija znači da je **vanjska mreža za promjene tokova beskonačna impedancija**: kad
 se unutar Hrvatske nešto promijeni, preraspodjela toka može ići samo unutarnjim putovima. U
@@ -31,27 +32,45 @@ stvarnosti dio preraspodjele ide kroz susjedne sustave (kružni tokovi).
 | Ispad unutarnjeg elementa blizu granice | preraspodjela samo unutarnjim putovima precjenjuje opterećenje unutarnjih paralelnih putova i podcjenjuje promjenu na prekograničnim vodovima | **zadržava se u N-1, uz zastavice (§3.3)** |
 | Promjena proizvodnje unutar HR (isključenje korisnika, ograničenje) | razmjene se ne mijenjaju; neravnoteža ide na odabrani način uravnoteženja | tri varijante (pogl. 6) |
 
-## 3.3 Zastavice za ispade blizu granice
+## 3.3 Ispadi blizu granice
 
-Za svaki N-1 slučaj alat računa sljedeće pokazatelje i označava slučaj ako je ijedan prekoračen.
-Pokazatelji su heuristički — označen slučaj nije nužno pogrešan, nego ga treba pogledati.
+Za svaki N-1 slučaj računaju se sljedeći pokazatelji i flaggaju se u slučaju prekoračenja. 
+Pokazatelji su heuristički - ako je nešto flagagno, ne znači da je nešto nužno krivo, nego bi ga trebalo pregledati.
 
 | Oznaka | Pokazatelj | Zadana granica | Zašto |
-|---|---|---|---|
-| G1 | Hrvatska sabirnica prekograničnog voda nakon ispada ostaje povezana s ostatkom mreže samo jednim putem | — | sav tok preko tog voda mora proći jednim unutarnjim putem; u stvarnosti bi se dio razmjene preusmjerio na druge prekogranične vodove |
+|--------|------------|----------------|-------|
+| G1 | Hrvatska strana prekograničnog voda nakon ispada ostaje povezana s ostatkom mreže samo jednim putem | — | sav tok preko tog voda mora proći jednim unutarnjim putem; u stvarnosti bi se dio razmjene preusmjerio na druge prekogranične vodove |
 | G2 | Kutna razlika na krajevima ispalog elementa u stanju nakon ispada, $\lvert \theta_i - \theta_j \rvert$ | 20° | velika razlika znači da je unutarnji zaobilazni put "dugačak" (velika impedancija); kroz susjedne sustave postoji kraći put koji model nema |
 | G3 | Porast opterećenja nekog elementa unutar dva čvorišta od X-čvorišta | +20 postotnih bodova | izravan znak preraspodjele uz granicu |
-| G4 | Ispad odvaja dio mreže (otok) | — | izgubljena proizvodnja/potrošnja otoka ide na uravnoteženje; to nije pogreška granice, ali mijenja tokove |
+| G4 | Ispad odvaja dio mreže (otok) | — | izgubljena proizvodnja/potrošnja otoka ide na uravnoteženje (mijenjaju se tokovi) |
 
-Granice su u postavkama i mogu se mijenjati. Kad postane dostupan ekvivalent (§3.4–3.6),
-označene slučajeve moguće je izravno usporediti s točnijim modelom i provjeriti koliko je
+Kad postane dostupan ekvivalent (§3.4–3.6), označene slučajeve moguće je izravno usporediti s točnijim modelom i provjeriti koliko je
 heuristika dobra.
 
 ## 3.4 Mrežni ekvivalenti — zajednička osnova
 
-Neka su sabirnice podijeljene na unutarnje ($I$, Hrvatska), granične ($B$, X-čvorišta ili
-hrvatske sabirnice prekograničnih vodova) i vanjske ($E$, susjedni sustavi). Linearne
-jednadžbe vanjskog dijela:
+Sabirnice kategoriziramo kao unutarnje ($I$, Hrvatska), granične ($B$, X-čvorišta ili
+hrvatske sabirnice prekograničnih vodova) i vanjske ($E$, susjedni sustavi).
+
+Ekvivalent vanjske mreže bi trebao mijenjati cijelu vanjsku mrežu manjim modelom koji bi, gledano na granici, 
+davao isto rješenje u osnovnom stanju i približno isti odziv na promjene. Sva tri prijedloga ekvivalenta niže 
+**zahtijevaju model vanjske mreže** — iz ovako reduciranog modela hrvatske mreže ne mogu se napraviti.
+
+## 3.5 Wardov i prošireni Wardov ekvivalent
+
+Wardov ekvivalent zamijenjuje vanjski sustav (dakle sve susjedne države) puno manjom mrežom. 
+Što želimo od Wardovih ekvivalenata u našem slučaju?
+- Preciznu 'reprezentaciju' za napone i tokove snaga u svakom X-čvorištu 
+- Približnu točnost u slučajevima kada se uvjeti u sustavu mijenjaju (npr. ispad, redispečing) - ekvivalent bi se trebao 
+odazvati približno isto kao i full vanjski model
+
+Prvu točku je relativno jednostavno modelirati Ward ekvivalentom. Druga točka je ono što 
+nam radi razliku i zbog čega promatramo nekoliko varijacija na temu - Ward, prošireni Ward i REI.
+
+### Wardov ekvivalent
+
+Kako smo rekli, sabirnice se razdvajaju u tri kategorije - unutarnje ($I$), granične ($B$) i vanjske ($E$).
+Linearne jednadžbe vanjskog dijela (vrijede i za ostale metode) :
 
 $$
 \begin{bmatrix}\mathbf{I}_B\\ \mathbf{I}_E\end{bmatrix} =
@@ -59,14 +78,18 @@ $$
 \begin{bmatrix}\mathbf{U}_B\\ \mathbf{U}_E\end{bmatrix}.
 $$
 
-Ekvivalent zamjenjuje vanjski dio manjim modelom koji, gledano s granice, daje isto rješenje u
-osnovnom stanju i približno isti odziv na promjene. Sva tri ekvivalenta niže **zahtijevaju model
-vanjske mreže** ($\mathbf{Y}_{EE}$, $\mathbf{Y}_{BE}$ i vanjske injekcije) — iz hrvatskog
-izvatka se ne mogu izraditi.
+gdje je $\mathbf{I}$ vektor injektiranih struja, a $\mathbf{U}$ vektor napona na sabirnicama.
+Jednadžbe se rješavaju za dobiti napon vanjskih sabirnica $\mathbf{U}_{E}$.
 
-## 3.5 Wardov i prošireni Wardov ekvivalent
+$$
+\mathbf{U}_(E} = \mathbf{Y}_{EE}^{-1}(\mathbf{I}_{E}-\mathbf{Y}_{EB}\mathbf{U}_{B}
+$$
 
-### Wardov ekvivalent
+Supstituiramo taj izraz u prvu linearnu jednadžbu:
+
+$$
+(\mathbf{Y}_{BB}-\mathbf{Y}_{BE}\mathbf{Y}_{EE}^{-1}\mathbf{Y}-{EB})\mathbf{U}_{B} = \mathbf{I}-\mathbf{Y}_{BE}\mathbf{Y}_{EE}^{-1}\mathbf{I}_{E}
+$$
 
 Vanjske sabirnice uklanjaju se Gaussovom eliminacijom (Kronova redukcija):
 
