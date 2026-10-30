@@ -35,7 +35,7 @@ stvarnosti dio preraspodjele ide kroz susjedne sustave (kružni tokovi).
 ## 3.3 Ispadi blizu granice
 
 Za svaki N-1 slučaj računaju se sljedeći pokazatelji i flaggaju se u slučaju prekoračenja. 
-Pokazatelji su heuristički - ako je nešto flagagno, ne znači da je nešto nužno krivo, nego bi ga trebalo pregledati.
+Pokazatelji su heuristički - ako je nešto flaggano, ne znači da je nešto nužno krivo, nego bi ga trebalo pregledati.
 
 | Oznaka | Pokazatelj | Zadana granica | Zašto |
 |--------|------------|----------------|-------|
