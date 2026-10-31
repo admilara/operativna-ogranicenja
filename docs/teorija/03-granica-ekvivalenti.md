@@ -60,6 +60,7 @@ davao isto rješenje u osnovnom stanju i približno isti odziv na promjene. Sva 
 
 Wardov ekvivalent zamijenjuje vanjski sustav (dakle sve susjedne države) puno manjom mrežom. 
 Što želimo od Wardovih ekvivalenata u našem slučaju?
+
 - Preciznu 'reprezentaciju' za napone i tokove snaga u svakom X-čvorištu 
 - Približnu točnost u slučajevima kada se uvjeti u sustavu mijenjaju (npr. ispad, redispečing) - ekvivalent bi se trebao 
 odazvati približno isto kao i full vanjski model
@@ -164,10 +165,11 @@ $$P_{pv,i}=P_{inj,i}-P_{lok,i}-P_{sh,i}(U_i)-\sum_j P_{ij},\qquad
 P_{ij}\approx\frac{\theta_i-\theta_j}{x_{ij}},$$
 
 gdje su: 
-- $P_{pv,i}$ tok prekograničnim vodom prema unutarnjoj mreži, 
-- $P_{inj,i}$ Wardova injekcija, 
-- $P_{lok,i}$ teret ili proizvodnja priključeni na samu sabirnicu, a 
-- $P_{sh,i}$ snaga ekvivalentnog poprečnog elementa.
+
+ - $P_{pv,i}$ tok prekograničnim vodom prema unutarnjoj mreži, 
+ - $P_{inj,i}$ Wardova injekcija, 
+ - $P_{lok,i}$ teret ili proizvodnja priključeni na samu sabirnicu, a 
+ - $P_{sh,i}$ snaga ekvivalentnog poprečnog elementa.
 
 Dakle, **Wardova injekcija je stalna**, a **kutovi $\theta_i$, $\theta_j$ i iznos napona $U_i$ se mijenjaju, 
 što mijenja i tokove. Kod stalnih PQ injekcija na X-čvorištima, rubno čvorište ima samo impedanciju tog prekograničnog voda
@@ -175,16 +177,36 @@ i injekciju, što ne dopušta da se tokovi mijenjaju.
 
 ### Prošireni Wardov ekvivalent (xWard)
 
-Na svaku graničnu sabirnicu dodaje se fiktivni PV generator iza impedancije. Generator daje
-jalovu snagu kojom vanjski sustav podupire napon na granici. Djelatni dio ostaje kao kod
-Wardova ekvivalenta. U pandapoweru: element `xward`.
+Nadogradnja na početni Wardov ekvivalent napravljena je kako bi se dobio bolji odziv za jalovu snagu.
+- Na svaku graničnu sabirnicu dodaje se fiktivni PV generator iza fiktivne impedancije. 
+- Napon za taj fiktivni generator se zadaje tako da održava napon iz početnog stanja, tako da bez obzira
+na promjenu u unutarnjoj mreži napon ostaje isti, ali jalova injekcija izvana se može promijeniti.
+- Djelatni dio ostaje kao kod Wardova ekvivalenta. U pandapoweru se modelira pomoću elementa `xward`.
 
-> [!NOTE]
-> **Théveninova impedancija po X-čvorištu nije Wardov ekvivalent.** Impedancije iz proračuna
-> kratkog spoja (kao u NEPLAN-u za EVP Novska) daju samo dijagonalu matrice
-> $\mathbf{Z}_{eq} = \mathbf{Y}_{eq}^{-1}$ — svako X-čvorište zasebno prema "krutoj mreži".
-> Izvandijagonalni članovi, koji opisuju prijenos između X-čvorišta kroz susjedne sustave,
-> tada nedostaju. Za preraspodjelu tokova nakon ispada upravo su oni bitni.
+### Ward i Thevenin
+Ekvivalentnu mrežu u modeliranju, kada nam nisu dostupni podatci o ostatku mreže, možemo 
+prikazati Theveninovim ekvivalentom (izvorom iza Theveninove impedancije), koji se dobiva iz
+snage kratkog spoja na odabranim sabirnicama. Zato se čini kao dobra ideja napraviti isto i na 
+X-čvorištima tj. svaku interkonekciju zamijeniti izvorom iza impedancije i tako 'dodati' vanjske
+sustave u model. 
+
+Takav način je okej za bazne tokove snaga, ali u slučajevima proračuna N-1 davat će pogrešne
+rezultate. Wardov ekvivalent i Theveninov ekvivalent **cijelog** vanjskog sustava kao linearni modeli
+su zapravo ista stvar. **ALI** Theveninov ekvivalent **po X-čvorištima** se razlikuje u nekim stvarima.
+
+#### Oznake
+
+| Oznaka | Značenje |
+|---|---|
+| $\mathbf I_X$ | vektor struja koje vanjski sustav preko interkonekcija predaje unutarnjem sustavu |
+| $\mathbf U_B$ | vektor napona X-čvorišta | 
+| $\mathbf Y_{eq}$ | admitancijska matrica vanjskog sustava svedena na granične sabirnice (Kronova redukcija, §3.5) |
+| $\mathbf Z_{eq} = \mathbf Y_{eq}^{-1}$ | impedancijska matrica vanjskog sustava gledano s granice |
+| $Z_{ii}$ | **vlastita (ulazna) impedancija** X-čvorišta $i$ |
+| $Z_{ij}$ | **prijenosna (međusobna) impedancija** između X-čvorišta $i$ i $j$ |
+| $\mathbf J$ | Nortonove struje (struje izvora uz kratko spojene granične sabirnice) |
+| $\mathbf E_B$ | Théveninovi naponi (naponi praznog hoda graničnih sabirnica) |
+
 
 ## 3.6 REI ekvivalent (Dimo)
 
