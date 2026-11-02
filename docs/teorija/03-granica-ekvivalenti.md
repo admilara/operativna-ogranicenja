@@ -1,305 +1,211 @@
 # 3. Granica sustava i ekvivalenti
 
-## 3.1 Problem
-
-Isporučeni modeli sadrže **samo hrvatski podsustav**. Prekogranični vodovi završavaju u
-X-čvorištima, a mreža susjednih sustava (BA, SI, HU, RS, ME) modelirana je kao konstantna PQ injekcija. 
-Takav način ekvivalentiranja je okej za jednostavne tokove snaga, ali kada se u priču ubace N-1 i
-proračuni operativnih ograničenja, imamo neke manjkavosti. U ovom dijelu istražujemo na koji 
-način se vanjski sustavi mogu modelirati (bar u pandapoweru) da služe svrsi u svim ovim slučajevima i 
-što zapravo ovakav način modeliranja znači za konačne rezultate.
-
-Trenutno stanje: **razmjene na X-čvorištima zadaju se kao stalne PQ injekcije** iz spremljenog
-rješenja (v. §1.6). O
-
-## 3.2 Stalne PQ injekcije na X-čvorištima
-
-### Što je dobro
-
-U osnovnom stanju scenarija model je točan: tokovi na svim prekograničnim vodovima su upravo
-oni iz dostavljenog modela, što odgovara razmjenama po vodovima koji su naveni u tablici u Smjernicama.
-
-### Što je manje dobro
-
-Stalna injekcija znači da je **vanjska mreža za promjene tokova beskonačna impedancija**: kad
-se unutar Hrvatske nešto promijeni, preraspodjela toka može ići samo unutarnjim putovima. U
-stvarnosti dio preraspodjele ide kroz susjedne sustave (kružni tokovi).
-
-| Slučaj | Pogreška | Odluka |
-|---|---|---|
-| Ispad prekograničnog voda | X-čvorište ostaje otok; cijela razmjena tog voda (npr. ~1000 MW na 400 kV) seli se na referentni čvor | **prekogranični vodovi isključeni su iz N-1** |
-| Ispad unutarnjeg elementa daleko od granice | malena | — |
-| Ispad unutarnjeg elementa blizu granice | preraspodjela samo unutarnjim putovima precjenjuje opterećenje unutarnjih paralelnih putova i podcjenjuje promjenu na prekograničnim vodovima | **zadržava se u N-1, uz zastavice (§3.3)** |
-| Promjena proizvodnje unutar HR (isključenje korisnika, ograničenje) | razmjene se ne mijenjaju; neravnoteža ide na odabrani način uravnoteženja | tri varijante (pogl. 6) |
-
-## 3.3 Ispadi blizu granice
-
-Za svaki N-1 slučaj računaju se sljedeći pokazatelji i flaggaju se u slučaju prekoračenja. 
-Pokazatelji su heuristički - ako je nešto flaggano, ne znači da je nešto nužno krivo, nego bi ga trebalo pregledati.
-
-| Oznaka | Pokazatelj | Zadana granica | Zašto |
-|--------|------------|----------------|-------|
-| G1 | Hrvatska strana prekograničnog voda nakon ispada ostaje povezana s ostatkom mreže samo jednim putem | — | sav tok preko tog voda mora proći jednim unutarnjim putem; u stvarnosti bi se dio razmjene preusmjerio na druge prekogranične vodove |
-| G2 | Kutna razlika na krajevima ispalog elementa u stanju nakon ispada, $\lvert \theta_i - \theta_j \rvert$ | 20° | velika razlika znači da je unutarnji zaobilazni put "dugačak" (velika impedancija); kroz susjedne sustave postoji kraći put koji model nema |
-| G3 | Porast opterećenja nekog elementa unutar dva čvorišta od X-čvorišta | +20 postotnih bodova | izravan znak preraspodjele uz granicu |
-| G4 | Ispad odvaja dio mreže (otok) | — | izgubljena proizvodnja/potrošnja otoka ide na uravnoteženje (mijenjaju se tokovi) |
-
-Kad postane dostupan ekvivalent (§3.4–3.6), označene slučajeve moguće je izravno usporediti s točnijim modelom i provjeriti koliko je
-heuristika dobra.
-
-## 3.4 Mrežni ekvivalenti — zajednička osnova
-
-Sabirnice kategoriziramo kao unutarnje ($I$, Hrvatska), granične ($B$, X-čvorišta ili
-hrvatske sabirnice prekograničnih vodova) i vanjske ($E$, susjedni sustavi).
-
-Ekvivalent vanjske mreže bi trebao mijenjati cijelu vanjsku mrežu manjim modelom koji bi, gledano na granici, 
-davao isto rješenje u osnovnom stanju i približno isti odziv na promjene. Sva tri prijedloga ekvivalenta niže 
-**zahtijevaju model vanjske mreže** — iz ovako reduciranog modela hrvatske mreže ne mogu se napraviti.
-
-## 3.5 Wardov i prošireni Wardov ekvivalent
-
-Wardov ekvivalent zamijenjuje vanjski sustav (dakle sve susjedne države) puno manjom mrežom. 
-Što želimo od Wardovih ekvivalenata u našem slučaju?
-
-- Preciznu 'reprezentaciju' za napone i tokove snaga u svakom X-čvorištu 
-- Približnu točnost u slučajevima kada se uvjeti u sustavu mijenjaju (npr. ispad, redispečing) - ekvivalent bi se trebao 
-odazvati približno isto kao i full vanjski model
-
-Prvu točku je relativno jednostavno modelirati Ward ekvivalentom. Druga točka je ono što 
-nam radi razliku i zbog čega promatramo nekoliko varijacija na temu - Ward, prošireni Ward i REI.
-
-### Wardov ekvivalent
-
-Kako smo rekli, sabirnice se razdvajaju u tri kategorije - unutarnje $I$, granične $B$ i vanjske $E$.
-Linearne jednadžbe vanjskog dijela (vrijede i za ostale metode) :
-
-$$
-\begin{bmatrix}\mathbf{I}_B\\ \mathbf{I}_E\end{bmatrix} =
-\begin{bmatrix}\mathbf{Y}_{BB} & \mathbf{Y}_{BE}\\ \mathbf{Y}_{EB} & \mathbf{Y}_{EE}\end{bmatrix}
-\begin{bmatrix}\mathbf{U}_B\\ \mathbf{U}_E\end{bmatrix}.
-$$
-
-gdje je $\mathbf{I}$ vektor injektiranih struja, a $\mathbf{U}$ vektor napona na sabirnicama.
-Jednadžbe se rješavaju za dobiti napon vanjskih sabirnica $\mathbf{U}_{E}$.
-
-$$
-\mathbf{U}_{E} = \mathbf{Y}_{EE}^{-1}\left(\mathbf{I}_{E}-\mathbf{Y}_{EB}\mathbf{U}_{B}\right)
-$$
-
-Supstituiramo taj izraz u prvu linearnu jednadžbu:
-
-$$
-\left(\mathbf{Y}_{BB}-\mathbf{Y}_{BE}\mathbf{Y}_{EE}^{-1}\mathbf{Y}_{EB}\right)\mathbf{U}_{B} = \mathbf{I}-\mathbf{Y}_{BE}\mathbf{Y}_{EE}^{-1}\mathbf{I}_{E}
-$$
-
-Vanjske sabirnice uklanjaju se Gaussovom eliminacijom $E$ čvorišta (Kronova redukcija):
-
-$$\mathbf{Y}_{eq} = \mathbf{Y}_{BB} - \mathbf{Y}_{BE}\,\mathbf{Y}_{EE}^{-1}\,\mathbf{Y}_{EB},$$
-
-- $\mathbf{Y}_{eq}$ se naziva još i Schurov komplement od $\mathbf{Y}_{EE}$. 
-
-$$\mathbf{I}_{B,eq} = -\mathbf{Y}_{BE}\,\mathbf{Y}_{EE}^{-1}\,\mathbf{I}_E,\qquad
-\mathbf{I}_E = \left(\frac{\mathbf{S}_E}{\mathbf{U}_E}\right)^{*}\ \text{(osnovno stanje)}.$$
-
-Rezultat na granici:
-
-- **ekvivalentne grane između svakog para graničnih sabirnica** — $\mathbf{Y}_{eq}$ je puna
-  matrica. To je najvažniji dio: vandijagonalni članovi opisuju paralelne putove *kroz*
-  susjedne sustave, između sabirnica $i$ i $j$, koji preuzimaju dio toka kad unutar Hrvatske dođe do ispada;
-- **poprečne admitancije** na graničnim sabirnicama (dijagonala);
-- **injekcije** na graničnim sabirnicama, $\mathbf{S}_{B,eq} = \mathbf{U}_B\,\mathbf{I}_{B,eq}^{*}$,
-  koje u osnovnom stanju točno reproduciraju razmjene;
-- matrica može biti nesimetrična ukoliko vanjski sustav sadrži phase shiftere.
-
-Minusi Wardovog ekvivalenta: vanjski generatori i tereti su stalne injekcije struje (tj. stalne snage na granici).
-Vanjski sustav nema regulaciju napona ni rezerve jalove snage, a točnost opada s udaljenošću od
-osnovnog stanja.
-
-### Fizikalno značenje ekvivalentnih grana
- 
-Vandijagonalni član nakon eliminacije je
- 
-$$Y_{eq,ij}=Y_{BB,ij}-\sum_{k,l\in E}Y_{BE,ik}\,\big(\mathbf Y_{EE}^{-1}\big)_{kl}\,Y_{EB,lj}.$$
- 
-To je **prijenosna admitancija**: koliko struje se pojavi u sabirnici $i$ po voltu narinutom
-na sabirnicu $j$, kroz sve vanjske putove, uključujući i putove preko poprečnih elemenata prema
-zemlji. Prikaz te veličine kao grane $y_{ij}=-Y_{eq,ij}$ standardni je π-prikaz — 
-**ekvivalentna grana nije vodič**. Svaki fizički element vanjske mreže ima
-$\mathrm{Re}\,z\ge 0$, ali $Y_{eq,ij}$ je **omjer umnožaka** tih elemenata, a umnošci i
-kvocijenti kompleksnih brojeva različitih kutova mogu završiti u bilo kojem kvadrantu - tako da ta
-vrijednost može biti **pozitivna ili negativna**. Najjednostavniji primjer je pretvorba zvijezde u trokut. 
-
-
-**Ukupni gubici ostaju točni.** Kronova redukcija čuva ponašanje vanjske mreže gledano s
-rubnih čvorišta: za iste napone dobivaju se iste struje kao u izvornoj pasivnoj
-mreži, pa je ukupna snaga koju ekvivalent troši za bilo koje napone jednaka izvornoj i $\ge 0$.
-Umjetna je samo podjela na grane i poprečne elemente — grana s negativnim R uvijek je
-kompenzirana susjednim granama i poprečnim elementima. Zato gubici na pojedinom fiktivnom
-elementu nemaju značenje, što je, uz nepostojanje nazivne vrijednosti, još jedan razlog da
-fiktivni elementi ne ulaze u N-1 ni u nadzor opterećenja.
- 
-> [!NOTE]
-> **Koliko je to često?** U Wardovu ekvivalentu poprečni elementi s negativnom vodljivošću su
-> uobičajeni, osobito u admitancijskom obliku (generatori pretvoreni u admitancije
-> $y = S^*/\lvert U\rvert^2$ imaju negativnu vodljivost). Grane s negativnim R ili kapacitivnim X
-> moguće su, ali nisu tipičan ishod.
-
-
-### **Što se događa s generatorima i teretima?**
-Kronova redukcija točna je samo za potpuno linearne sustave. Tereti i generatori su
-nelinearni elementi i oni injektiraju stalnu snagu, a ne stalnu struju. Ideja Wardovog 
-ekvivalenta je da se koristi na **rješenom baznom slučaju** tako da se svaka vanjska injekcija
-može pretvoriti u rubni uvjet. Dva načina na koji se to postiže su:
-
-| Varijanta | Vanjska injekcija | Što se dogodi? |
-|---|---|---|
-| Wardova injekcija | konstantna struja (iz base-case napona) | ekvivalentne injekcije snage u rubnim čvorištima |
-| Wardova admitancija | konstantna admitancija | 'apsorbira' se u $\mathbf{Y}_{EE}$ tako da je $\mathbf{I}_{E} = 0$. Ostaju ekvivalentni shuntovi na rubovima. |
-
-Razlika je u odzivu na promjenu u unutarnjem sustavu. 
-- Wardova injekcija - vanjski sustav je konstantna injekcija. S obzirom da iznos ovisi o naponu u rubnom
-čvorištu, u slučaju ispada nekog elementa mijenjaju se **kutovi i naponi graničnih čvorišta**, a time onda
-i tokovi po ekvivalentnim granama. Bilanca djelatne snage u graničnoj sabirnici $i$ je:
-
-$$P_{pv,i}=P_{inj,i}-P_{lok,i}-P_{sh,i}(U_i)-\sum_j P_{ij},\qquad
-P_{ij}\approx\frac{\theta_i-\theta_j}{x_{ij}},$$
-
-gdje su: 
-
- - $P_{pv,i}$ tok prekograničnim vodom prema unutarnjoj mreži, 
- - $P_{inj,i}$ Wardova injekcija, 
- - $P_{lok,i}$ teret ili proizvodnja priključeni na samu sabirnicu, a 
- - $P_{sh,i}$ snaga ekvivalentnog poprečnog elementa.
-
-Dakle, **Wardova injekcija je stalna**, a **kutovi $\theta_i$, $\theta_j$ i iznos napona $U_i$ se mijenjaju, 
-što mijenja i tokove. Kod stalnih PQ injekcija na X-čvorištima, rubno čvorište ima samo impedanciju tog prekograničnog voda
-i injekciju, što ne dopušta da se tokovi mijenjaju. 
-
-### Prošireni Wardov ekvivalent (xWard)
-
-Nadogradnja na početni Wardov ekvivalent napravljena je kako bi se dobio bolji odziv za jalovu snagu.
-- Na svaku graničnu sabirnicu dodaje se fiktivni PV generator iza fiktivne impedancije. 
-- Napon za taj fiktivni generator se zadaje tako da održava napon iz početnog stanja, tako da bez obzira
-na promjenu u unutarnjoj mreži napon ostaje isti, ali jalova injekcija izvana se može promijeniti.
-- Djelatni dio ostaje kao kod Wardova ekvivalenta. U pandapoweru se modelira pomoću elementa `xward`.
-
-### Ward i Thevenin
-Ekvivalentnu mrežu u modeliranju, kada nam nisu dostupni podatci o ostatku mreže, možemo 
-prikazati Theveninovim ekvivalentom (izvorom iza Theveninove impedancije), koji se dobiva iz
-snage kratkog spoja na odabranim sabirnicama. Zato se čini kao dobra ideja napraviti isto i na 
-X-čvorištima tj. svaku interkonekciju zamijeniti izvorom iza impedancije i tako 'dodati' vanjske
-sustave u model. 
-
-Takav način je okej za bazne tokove snaga, ali u slučajevima proračuna N-1 davat će pogrešne
-rezultate. Wardov ekvivalent i Theveninov ekvivalent **cijelog** vanjskog sustava kao linearni modeli
-su zapravo ista stvar. **ALI** Theveninov ekvivalent **po X-čvorištima** se razlikuje u nekim stvarima.
-
-#### Oznake
-
-| Oznaka | Značenje |
-|---|---|
-| $\mathbf I_X$ | vektor struja koje vanjski sustav preko interkonekcija predaje unutarnjem sustavu |
-| $\mathbf U_B$ | vektor napona X-čvorišta | 
-| $\mathbf Y_{eq}$ | admitancijska matrica vanjskog sustava svedena na granične sabirnice (Kronova redukcija, §3.5) |
-| $\mathbf Z_{eq} = \mathbf Y_{eq}^{-1}$ | impedancijska matrica vanjskog sustava gledano s granice |
-| $Z_{ii}$ | **vlastita (ulazna) impedancija** X-čvorišta $i$ |
-| $Z_{ij}$ | **prijenosna (međusobna) impedancija** između X-čvorišta $i$ i $j$ |
-| $\mathbf J$ | Nortonove struje (struje izvora uz kratko spojene granične sabirnice) |
-| $\mathbf E_B$ | Théveninovi naponi (naponi praznog hoda graničnih sabirnica) |
-
-
-## 3.6 REI ekvivalent (Dimo)
-
-### Ideja
-
-REI (*Radial, Equivalent and Independent*, P. Dimo, 1975.) prije eliminacije **grupira aktivne
-vanjske injekcije** (npr. sve generatore jednog susjednog sustava) u jedan fiktivni čvor, tako
-da te injekcije prežive eliminaciju kao **stvarni PV generator**, a ne kao stalna struja.
-Zato REI bolje opisuje odziv vanjskog sustava na promjene — djelatnu (generator može
-preuzimati neravnotežu) i jalovu (regulira napon).
-
-### Konstrukcija
-
-Neka je $G$ skupina vanjskih sabirnica s injekcijama koje se grupiraju, s naponima $U_i$ i
-injekcijama $S_i$ iz riješenog osnovnog stanja.
-
-**1. Zbirne veličine.** Za $i \in G$:
-
-$$I_i = \left(\frac{S_i}{U_i}\right)^{*},\qquad
-S_R = \sum_{i\in G} S_i,\qquad I_R = \sum_{i\in G} I_i,\qquad U_R = \frac{S_R}{I_R^{*}}.$$
-
-$U_R$ je napon novog čvora R koji u osnovnom stanju točno predaje snagu $S_R$ strujom $I_R$.
-
-**2. Mreža nulte bilance snage (ZPBN, *zero power balance network*).** Dodaju se čvor 0 s
-naponom $U_0 = 0$ i čvor R s naponom $U_R$, te grane:
-
-$$y_{i0} = -\frac{S_i^{*}}{|U_i|^2}\quad (i \in G),\qquad
-y_{0R} = \frac{S_R^{*}}{|U_R|^2}.$$
-
-Provjera: struja grane od $i$ prema 0 je $U_i\,y_{i0} = -S_i^{*}/U_i^{*} = -I_i$, tj. grana u
-sabirnicu $i$ utiskuje upravo $I_i$ — zamjenjuje izvornu injekciju. U čvor 0 utječe
-$\sum(-I_i) = -I_R$, a granom 0–R teče $(U_0 - U_R)\,y_{0R} = -I_R$ — Kirchhoffov zakon u čvoru 0
-je zadovoljen. Snaga koju ZPBN troši:
-
-$$\sum_{i\in G} U_i (-I_i)^{*} - U_R(-I_R)^{*} = -\sum_i S_i + S_R = 0,$$
-
-otuda naziv: ZPBN u osnovnom stanju ne troši ni ne predaje snagu.
-
-**3. Zamjena injekcija.** Izvorne injekcije u $G$ se uklanjaju; u čvor R postavlja se generator
-$P_R = \mathrm{Re}\,S_R$ s naponom $|U_R|$ i zbrojenim granicama jalove snage. Sabirnice iz $G$
-sada su pasivne.
-
-**4. Eliminacija.** Čvor 0 i sve pasivne vanjske sabirnice uklanjaju se Kronovom redukcijom
-(§3.5). Ostaju granične sabirnice, čvor R (ili više njih) i ekvivalentne grane između njih.
-
-### Svojstva
-
-- **Točan u osnovnom stanju**, po konstrukciji.
-- **Izvan osnovnog stanja**: promjena snage generatora R raspodjeljuje se na izvorne jedinice
-  u omjeru admitancija ZPBN-a, dakle približno razmjerno njihovim strujama u osnovnom stanju.
-  To je implicitni GSK (*generation shift key*) razmjeran proizvodnji — isti princip koji
-  ENTSO-E koristi za proračun prijenosnih kapaciteta.
-- **Izbor skupina** određuje točnost: grupiranje po sustavu (jedan R po susjedu) daje prirodnu
-  vezu s razmjenama po granicama; grupiranje po električnoj blizini (koherentnosti) daje veću
-  točnost za ispade blizu granice; tereti se obično grupiraju odvojeno od generatora.
-
-| | Ward | xWard | REI |
-|---|---|---|---|
-| Paralelni putovi kroz susjede | da | da | da |
-| Jalova potpora napona na granici | ne | da (fiktivni PV po graničnoj sabirnici) | da (stvarni zbirni generatori) |
-| Djelatni odziv vanjskih generatora | ne | ne | da (preko R čvorova) |
-| Točnost za velike promjene | najmanja | srednja | najveća |
-| Broj fiktivnih elemenata | grane između svih graničnih sabirnica | + PV po sabirnici | + R čvorovi i njihove grane |
-
-## 3.7 Uporaba REI ekvivalenta u ovom alatu (buduće)
-
-Preduvjet je model susjednih sustava za isti scenarij i godinu — npr. ENTSO-E zajednički mrežni
-model (CGM/IGM, CGMES format, koji pandapower uvozi) ili regionalni PSS/E model. pandapower ima
-gotovu funkciju:
-
-```python
-from pandapower.grid_equivalents import get_equivalent
-net_eq = get_equivalent(net, "rei", boundary_buses, internal_buses)
+Mrežni model koji je dostavljen od strane HOPS-a sadrži samo hrvatski prijenosni sustav. 
+Međutim, Hrvatska je s 35 prekograničnih vodova u pogonu spojena s četiri susjedna sustava
+i tok snage kroz hrvatsku mrežu ovisi i o tome što se događa s druge strane. U ovom dijelu
+ćemo pregledati kako je modeliran sustav, granice i granični ekvivalenti. 
+
+## 3.1. Kako je granica opisana u modelu i što nam sve govori
+
+### 3.1.1. X-čvorišta
+
+Prekogranični vod spaja hrvatsku trafostanicu sa trafostanicom u sjednom sustavu. U 
+modelu je takav vod podijeljen na dvije polovice fiktivnom sabirnicom na mjestu granice
+koja se zove X-sabirnica (engl. boundary node)
+
+```
+  hrvatska sabirnica          X-sabirnica            sabirnica susjeda
+  60032 HERNES11  ────────────  99993 XER_PE12  ────────────  311080 (Pécs)
+                  hrvatska polovica              vanjska polovica
+                  (u modelu)                     (zapis postoji, kraj ne postoji)
 ```
 
-Što bi se time dobilo:
+Ovakva podjela dolazi iz načina na koji ENTSO-E spaja modele - svaki operator modelira 
+svoju mrežu do X-sabirnica na granici, a zajednički model nastaje spajanjem pojedinačnih
+modela na tim X-sabirnicama. Dvije polovice voda imaju R,X,B parametre razmjerne duljini
+svakog dijela. 
 
-1. **Ispadi prekograničnih vodova** postaju valjani N-1 slučajevi.
-2. **Ispadi blizu granice** dobivaju ispravnu preraspodjelu kroz susjedne sustave. Zastavice
-   G1–G3 mogu se umjesto heuristike zamijeniti stvarnom razlikom između modela sa stalnim
-   injekcijama i REI modela.
-3. **Varijanta uravnoteženja V3** (prekogranično, pogl. 6) dobiva fizikalnu podlogu: umjesto
-   proizvoljne raspodjele po X-čvorištima, neravnotežu preuzimaju R generatori susjednih sustava
-   s GSK-om iz ZPBN-a.
-4. **Naponi na granici**: vanjski sustav podupire napon jalovom snagom.
+### 3.1.2. što imamo, što ne?
 
-Ograničenja koja treba imati na umu:
+| Podatak | Zapisan? | Napomena |
+|---|---|---|
+| X-sabirnica, s naponom (VM, VA) | da | napon iz spremljenog rješenja |
+| hrvatska polovica voda (R, X, B, RATE, STAT) | da | |
+| vanjska polovica voda (R, X, B, RATE, STAT) | da | zapis postoji u bloku grana |
+| sabirnica susjeda na kraju vanjske polovice | **ne** | broj sabirnice se pojavljuje samo u zapisu grane |
+| mreža susjeda (vodovi, transformatori, elektrane, tereti) | **ne** | |
+| teret, generator ili shunt na X-sabirnici | **ne** | specificirana injekcija na X-sabirnici je nula |
+| razmjena po vodu (MW, Mvar) | **ne** | izvodi se iz napona — t. 3.1.3 |
 
-- Ekvivalentnih grana ima puno (do $n_B(n_B-1)/2$; za 35 graničnih sabirnica 595). Obično se
-  zanemaruju one s vrlo malom admitancijom.
-- Fiktivne grane **ne smiju ući u N-1 ni u nadzor opterećenja** — nemaju fizikalnu nazivnu
-  vrijednost, a mogu imati i negativne parametre.
-- Ekvivalent vrijedi za stanje iz kojeg je izrađen: **za svaki scenarij i godinu (42 modela)
-  izrađuje se zasebno**.
-- Granice jalove i djelatne snage R generatora su zbroj granica izvornih jedinica — za velike
-  promjene to je optimističnije od stvarnosti.
+Vanjska polovica voda navedena je kao grana, ali ne postoji joj drugi kraj! Takvih grana s
+nepostojećim krajem ima 40, a nepostojećih sabirnica 31. 
+
+> [!NOTE]
+> Najvažnija stvar je zapravo to da razmjena preko granice nigdje nije zapisana kao
+> injekcija. Na X-sabirnicama ne postoje ni teret ni generator koji bi predstavljali snagu 
+> koja odlazi/dolazi.
+
+### 3.1.3. Razmjena kao izvedena veličina
+
+Dostavljena .raw datoteka uz topologiju i parametre sadrži i spremljeno rješenje tj. iznos
+i kut napona sabirnica, onakve kakvi su bili kada je model izvezen. Ti su naponi izračunati
+u punom modelu, u kojem postoje susjedni sustavi (ili je izvezen iz Network Managera koji 
+ima područje osmotrivosti i vidi i vanjske sustave do neke mjere).
+
+**Primjer: sabirnica 99993 (DV Ernestinovo - Pecs 2)**
+
+> 60032,'HERNES11    ', 400.0000,1,  16,   4, 404,1.02853,  96.0714,...
+> 99993,'XER_PE12    ', 400.0000,1,1631,  99,  11,1.02836,  94.0024,...
+> 60032, 99993,'2 ', 8.26000E-04, 8.85700E-03,0.24556, ...
+> 99993,311080,'2 ', 7.94000E-04, 8.51500E-03,0.23607, ...
+
+Hrvatska polovica (60032-99993) ima poznate napone na oba kraja. Struja koja s X-čvorišta
+ulazi u tu granu, po pi-modelu voda (uzdužna admitancija $\underline{y} = 1/(R + jX)$, a
+polovica poprečne susceptancije $B/2$ na svakom kraju), iznosi
+ 
+$$\underline{I}_X = (\underline{U}_X - \underline{U}_H)\,\underline{y} + \underline{U}_X\,\frac{jB}{2},$$
+ 
+a snaga
+ 
+$$\underline{S}_X = \underline{U}_X\,\underline{I}_X^{*}\cdot S_{baza} = -426{,}89 - j\,32{,}64\ \text{MVA}
+\qquad (S_{baza} = 100\ \text{MVA}).$$
+
+Negativan predznak znači da snaga **ulazi** u X-čvorište tj. izlazi iz hrvatskog sustava.
+
+Vanjskom polovicom tok se ne može izraćunati, jer napon sabirnica 311080 nije poznat. 
+A kako na X-čvorištima nema generatora ni tereta, imamo snagu razmjene koja nigdje ne ide.
+
+### 3.1.4. Gdje se razmjena mjeri?
+
+Iz drugog načina provjere slijedi da je **Prilog 5 mjeren na hrvatskom kraju voda**, a ne na
+granici. Razlika između dvaju mjesta mjerenja su gubici na hrvatskoj polovici voda; na primjeru
+iz §3.1.3 to je 428,33 − 426,89 = 1,44 MW.
+ 
+| Granica | Na hrvatskom kraju [MW] | Na X-sabirnici [MW] |
+|---|---:|---:|
+| HR – SI | 2677,6 | 2658,2 |
+| HR – HU | 1057,4 | 1053,7 |
+| HR – BA | 353,7 | 338,6 |
+| HR – RS | −419,4 | −422,6 |
+| HR – IT | 0 | 0 |
+| **Ukupno** | **3669,3** | **3628,0** |
+ 
+(Pozitivno = izvoz iz Hrvatske; model ScA_2029, scenarij A.)
+ 
+Za ovaj naš alat je mjerodavna vrijednost **na X-sabirnici**, jer se granica u modelu zatvara upravo tamo (t.3.2). Za usporedbu s Prilogom 5 koristi se vrijednost na hrvatskom kraju.
+ 
+> [!NOTE]
+> Zbroj redaka Priloga 5 za granicu HR – BA iznosi 353,8 MW, a redak "Ukupno (HR – BA)" u
+> Prilogu navodi 342,4 MW. Model se slaže sa zbrojem redaka; razlika od 11,4 MW je u samom
+> zbroju u Prilogu.
+
+### 3.1.5. Sažetak
+
+- Model sadrži (isključene) sabirnice koje su rezervirane za planirane vodove
+- Model sadrži (isključene) sabirnice za spoj HVDC prema Italiji
+- DV 400 kV Žerjavinec - Heviz 1 - postoji samo vanjska polovica voda?
+- DV 220 kV Trebinje - Plat 1 - nema čvorišta za Trebinje i nema čvorišta za HE Dubrovnik B 4(koji je u vlasništvu Republike Srpske u BiH), iako samo X-čvorište postoji.
+- Područje HR ima zadanu razmjenu PDES = 2512 MW, za koju je bilančni generator stavljen u
+TE Plomin, gdje je generator isključen, a iznos ne odgovara stvarnim razmjenama
+
+**Plat - Trebinje 1** - oba kraja X-čvorišta 99974 su nepostojeće sabirnice: 130215 (Trebinje) 
+i 62056 (HE Dubrovnik B). Paralelni pogon HE Dubrovnik A je u modelu i uključen je. 
+
+## 3.2. Kako ovaj model opisuje granična čvorišta?
+
+### 3.2.1. Stalna PQ injekcija na X-čvorištu
+
+Kako smo vidjeli iz prethodnog poglavlja, model se bez dodatne pretpostavke za granična
+čvorišta ne može do kraja modelirati - na svakoj X-sabirnici nedostaje element kako bi se 
+osnovna bilanca ispunila. 
+
+Najjednostavniji način da se taj nedostatak pokrpa je **stalna injekcija P i Q jednaka razmjeni iz spremljenog rješenja**. 
+
+- vanjska polovica interkonekcije se izostavlja (tak i tak nemamo drugi kraj voda)
+- na X-sabirnicu se postavlja **teret** iznosa P,Q jednakim snazi razmjene
+- teret dobiva oznaku `granica=True` da ga se u pandapower modelu razlikuje od ostalih tereta
+- predznak slijedi konvenciju tereta - pozitivan teret = izvoz iz Hrvatske.
+
+```
+  60032 HERNES11  ────────────  99993 XER_PE12
+                  hrvatska polovica      │
+                  (u modelu)             ▼  teret  P = 426,89 MW,  Q = 32,64 Mvar
+                                            (granica=True)
+```
+
+### 3.2.2. Slack bus
+
+Za proračun tokova snaga nužno je da imamo jedan referentni čvor sa zadanim modulom i kutom napona
+čiji bi generator pokrivao razliku između ukupne proizvodnje i zbroja potrošnje i gubitaka. U 
+isporučenim modelima nema sabirnice tipa 3 te se odabir slack generatora ostavlja izrađivaču. Za
+potrebe izrade ovog modela odabrana je RHE Velebit kao reverzibilna hidroelektrana koja može 
+pokrivati neravnotežu u oba smjera. 
+
+U spremljenom stanju koje je dostavljeno, slack bus ne bi trebao raditi ništa, što je i okej. 
+Problem nastaje kada se stanje promjeni, što se upravo događa u N-1 analizi i proračunima za
+operativna ograničenja. 
+
+### 3.2.3. Što to fizikalno znači?
+
+Tokovi snaga na svakoj sabirnici rezultat su rješavanja dviju jednadžbi za radnu i jalovu snagu:
+
+$$P_k^{spec} - P_k(\mathbf{U}, \boldsymbol{\theta}) = 0, \qquad
+Q_k^{spec} - Q_k(\mathbf{U}, \boldsymbol{\theta}) = 0,$$
+
+gdje je $P_k^{spec}$ zadana injekcija (generatori minus tereti), a $P_k(\mathbf{U},\boldsymbol{\theta})$ snaga koja sa sabirnice odlazi granama, izračunata iz napona.
+
+**U stvarnosti**, tj. u punom modelu, na X-sabirnici je zadana injekcija nula, a vanjska polovica
+voda je grana kao i svaka druga. Snaga koju ona odnosi ovisi o naponima na oba svoja kraja - za 
+vod s reaktancijom $x$, uz zanemaren otpor vrijedi:
+
+$$P_{van} \approx \frac{U_X\,U_{susj}}{x}\,\sin(\theta_X - \theta_{susj}).$$
+
+Kada se nakon ispada u Hrvatskoj promijeni kut X-sabirnice $\Theta_X$, mijenja se i $P_{van}$. A
+jer je sabirnica susjeda spojena s ostatkom njegove mreže, mijenjaju se i $U_{susj}$, $\Theta_{susj}$ te tokovi na ostalim prekograničnim vodovima.
+
+U ovakvom modelu, vanjska polovica interkonekcije je zamijenjena teretom, a teret u ovom slučaju ne ovisi o naponu. Vanjski sustav bismo za ovaj slučaj zamijenili s 35 neovisnih idealnih 
+potrošača stalne snage. Iz toga onda slijede dva svojstva:
+
+> [!IMPORTANT]
+> 
+> 1. Nema grana između X-čvorišta. X-sabirnice su međusobno povezane samo kroz Hrvatsku mrežu. 
+> Svaki put koji u stvarnosti vodi preko susjednog sustava ne postoji.
+> 2. Nema odziva. Snaga na svakom prekograničnom vodu ostaje ista bez obzira na to što se 
+> dogodilo u našoj mreži. Napon X-sabirnice izvana ništa ne podupire, nego je u cjelosti 
+> određeno hrvatskom mrežom.
+
+### 3.2.4. Druga opcija - X-sabirnica kao kruta mreža
+
+Stalna injekcija P,Q kao teret nije jedini način za jednostavno modeliranje uvjeta na granici. 
+Druga mogućnost je i da se na svaku X-sabirnicu stavi model krute mreže (`ext_grid` u pandapoweru), sa stalnim iznosom i kutom napona iz spremljenog rješenja. 
+
+U osnovnom stanju to će točno reproducirati dobiveni model i tokove snaga, ali ima svoje 
+probleme:
+
+| | Stalna PQ injekcija | Kruta mreža na X-sabirnici |
+|---|---|---|
+| zadano na X-sabirnici | $P$, $Q$ | $U$, $\theta$ |
+| što se mijenja nakon ispada | $U_X$, $\theta_X$ | $P$, $Q$ na X-sabirnici |
+| ukupna razmjena Hrvatske | ostaje ista | mijenja se |
+| broj referentnih čvorova | jedan (Velebit) | 36 |
+| napon X-sabirnice | slobodan, bez potpore izvana | nepomičan, beskonačna potpora |
+
+Kruta mreža čvrsto drži kut tamo gdje je zadana. Kada bi se nakon ispada nekog elementa 
+kutovi u Hrvatskoj pomaknuli, svaka kruta mreža bi preuzela ili predala dio snage kako bi 
+zadržala kut napona koji joj je zadan. Tehnički na taj način svaka od tih sabirnica postaje novi
+referentni čvor što bi uzrokovalo promjenu snage razmjene bez da za to uopće postoji fizikalni
+razlog. Između dviju krutih mreža snaga može teći i "preko slack čvorišta", putem koji u 
+stvarnosti zapravo ne postoji.
+
+> [!NOTE]
+> Stvarni vanjski sustav je **između** tih dviju krajnosti. Ima konačne impedancije (pa
+> X-sabirnica nije kruta), ima mrežu koja X-sabirnice povezuje (pa nisu neovisne) i ima
+> elektrane koje reguliraju napon i snagu (pa se ne ponaša kao stalni teret). Sve vrste
+> ekvivalenata iz §3.5 pokušavaju opisati upravo to "između".
+
+### 3.2.5. Sažetak
+
+Stalna PQ injekcija točno reproducira zadano stanje, čuva ukupnu razmjenu i ima jedan
+slack bus, onaj koji mi odlučimo. Ali vanjski sustav se u tom slučaju ne ponaša kao u stvarnosti.
+Dok god se stanje ne mijenja, to nije ni važno - ali s obzirom da imamo obvezu analize N-1, 
+to nam zapravo ne odgovara. 
