@@ -245,3 +245,48 @@ Kada ispadne hrvatska polovica prekograničnog voda, X-sabirnica ostaje bez veze
 | tokovi na ostalim prekograničnim vodovima | nepromijenjeni (svi unutar 0,5 MW) | preuzimaju 1002,5 MW, većinom vodovi prema Sloveniji i Mađarskoj |
 
 Dakle, u slučaju ispada 400 kV voda kao što je Melina - Divača (što jest naravno ekstreman slučaj, ali kad već se u svim scenarijima modeliraju i ekstremni slučajevi proizvodnje, onda zašto bismo ignorirali ekstreman slučaj u slučaju N-1?), RHE Velebit bi trebao smanjiti snagu sa 179,4 MW na -944 MW kako bi pokrio nastalu razliku.  Razlika između 1002 i 1123 MW je zbog smanjenja gubitaka na zapadnom dijelu prijenosne mreže (S obzirom na visoko opterećenje zapadnog dijela mreže, normalno je da su manji gubitci kad je i manje opterećenje).
+
+> [!NOTE]
+> Ispad prekograničnog voda u modelu sa stalnim PQ nije valjan N-1 slučaj. Iz tog razloga isključujemo interkonekcijske vodove iz
+> N-1 analize, iako Smjernice traže N-1 analizu za sve utjecajne okolne elemente. Sve dok ne postoji drugačiji način raspodjele tokova sa granice (ili se oni ne smiju preraspodijeliti prema Uputama), ovakav način je nužan. 
+
+### 3.3.3. Ispad unutarnjeg elementa - fiksirane razmjene
+
+Kad ispadne unutarnji vod, X-sabirnice ostaju spojene, a teret na njima ostaje isti. Tok na hrvatskom kraju prekograničnog voda tada se može promijeniti samo za promjenu gubitaka na hrvatskoj polovici voda (do te promjene nema kako doći ako cijelo vrijeme njime ide fiksna P,Q). 
+
+Na 409 ispada unutarnjih vodova (
+
+
+
+### 3.3.4. Fake otoci u N-1 analizi
+
+U 27 od 409 ispada unutarnjeg voda, dio hrvatske mreže ostaje spojen sa susjednim sustavom samo preko X-sabirnica. U modelu je to naravno otok i ispada iz proračuna, zajedno sa svojom proizvodnjom, potrošnjom i razmjenom. U stvarnosti taj dio mreže može i dalje biti napajan preko susjednog sustava. 
+
+Najviše takvih situacija je u južnoj Dalmaciji (Plat, Komolac, Ston, Srđ, Rudine, Ponikve) - 13 različitih ispada odvaja je od ostatka hrvatske mreže, a ona je tehnički i dalje spojena na mrežu BiH (DV 220 kV Plat - Trebinje, DV 110 kV Komolac - Trebinje, DV 110 kV Ston - Neum). 
+
+| Ispad (unutarnji vod) | X-sabirnice u otoku | Razmjena u otoku [MW] | Promjena snage Velebita [MW] |
+|---|---|---:|---:|
+| 60049–60245 Konjsko – Cetina | 99985 Mostar | 630,2 | −526,3 |
+| 60118–60195 Ston – Ponikve | 99962, 99975, 99981 | 146,2 | −39,5 |
+| 60048–60196 Komolac – Rudine | 99962, 99975 | 120,0 | −75,4 |
+| 60064–80099 Međurić – `HSEHRV21` | 99977 Prijedor | −67,9 | +156,1 |
+
+Rezultati za takve ispade jednako su nevaljani kao i za ispade prekograničnih vodova. 
+
+### 3.3.5. Ispadi za koje tokovi snaga ne daju rješenja koja konvergiraju
+
+Za 6 od 409 ispada unutarnjih vodova ne možemo naći rješenje tokova snaga. (80XXX sabirnice su budući priključci Korisnika Mreže).
+
+| Ispad | Napon | Tok prije ispada [MW] | Opterećenje prije ispada |
+|---|---|---:|---:|
+| 60008–80111 Brinje – `HLJUT 21` | 220 kV | 261,7 | 44 % |
+| 60067–60109 Melina – Senj | 220 kV | 492,3 | 86 % |
+| 60032–80088 Ernestinovo – `HPARNI11` | 400 kV | 409,2 | 30 % |
+| 60150–80088 Žerjavinec – `HPARNI11` | 400 kV | 637,4 | 48 % |
+| 60066–80157 Melina – `HPETHC51` | 400 kV | 1191,6 | 101 % |
+| 60132–80157 Velebit – `HPETHC51` | 400 kV | 1121,0 | 89 % |
+
+
+
+
+
