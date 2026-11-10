@@ -63,12 +63,16 @@ Hrvatska polovica (60032-99993) ima poznate napone na oba kraja. Struja koja s X
 ulazi u tu granu, po pi-modelu voda (uzdužna admitancija $\underline{y} = 1/(R + jX)$, a
 polovica poprečne susceptancije $B/2$ na svakom kraju), iznosi
  
-$$\underline{I}_X = (\underline{U}_X - \underline{U}_H)\,\underline{y} + \underline{U}_X\,\frac{jB}{2},$$
+$$
+\underline{I}_X = (\underline{U}_X - \underline{U}_H)\,\underline{y} + \underline{U}_X\,\frac{jB}{2},
+$$
  
 a snaga
  
-$$\underline{S}_X = \underline{U}_X\,\underline{I}_X^{*}\cdot S_{baza} = -426{,}89 - j\,32{,}64\ \text{MVA}
-\qquad (S_{baza} = 100\ \text{MVA}).$$
+$$ 
+\underline{S}_X = \underline{U}_X\,\underline{I}_X^{*}\cdot S_{baza} = -426{,}89 - j\,32{,}64\ \text{MVA}
+\qquad (S_{baza} = 100\ \text{MVA}). 
+$$
 
 Negativan predznak znači da snaga **ulazi** u X-čvorište tj. izlazi iz hrvatskog sustava.
 
@@ -149,8 +153,10 @@ operativna ograničenja.
 
 Tokovi snaga na svakoj sabirnici rezultat su rješavanja dviju jednadžbi za radnu i jalovu snagu:
 
-$$P_k^{spec} - P_k(\mathbf{U}, \boldsymbol{\theta}) = 0, \qquad
-Q_k^{spec} - Q_k(\mathbf{U}, \boldsymbol{\theta}) = 0,$$
+$$
+P_k^{spec} - P_k(\mathbf{U}, \boldsymbol{\theta}) = 0, \qquad
+Q_k^{spec} - Q_k(\mathbf{U}, \boldsymbol{\theta}) = 0
+$$
 
 gdje je $P_k^{spec}$ zadana injekcija (generatori minus tereti), a $P_k(\mathbf{U},\boldsymbol{\theta})$ snaga koja sa sabirnice odlazi granama, izračunata iz napona.
 
@@ -158,7 +164,9 @@ gdje je $P_k^{spec}$ zadana injekcija (generatori minus tereti), a $P_k(\mathbf{
 voda je grana kao i svaka druga. Snaga koju ona odnosi ovisi o naponima na oba svoja kraja - za 
 vod s reaktancijom $x$, uz zanemaren otpor vrijedi:
 
-$$P_{van} \approx \frac{U_X\,U_{susj}}{x}\,\sin(\theta_X - \theta_{susj}).$$
+$$
+P_{van} \approx \frac{U_X\,U_{susj}}{x}\,\sin(\theta_X - \theta_{susj}).
+$$
 
 Kada se nakon ispada u Hrvatskoj promijeni kut X-sabirnice $\Theta_X$, mijenja se i $P_{van}$. A
 jer je sabirnica susjeda spojena s ostatkom njegove mreže, mijenjaju se i $U_{susj}$, $\Theta_{susj}$ te tokovi na ostalim prekograničnim vodovima.
@@ -209,3 +217,31 @@ Stalna PQ injekcija točno reproducira zadano stanje, čuva ukupnu razmjenu i im
 slack bus, onaj koji mi odlučimo. Ali vanjski sustav se u tom slučaju ne ponaša kao u stvarnosti.
 Dok god se stanje ne mijenja, to nije ni važno - ali s obzirom da imamo obvezu analize N-1, 
 to nam zapravo ne odgovara. 
+
+## 3.3. Posljedice za N-1 i operativna ograničenja
+
+### 3.3.1. Zašto nam je bitan odziv vanjske mreže?
+
+Osnovno stanje modela nikada se ne koristi samostalno bez promjene (osim recimo za potvrdu osnovnih tokova snaga i konvergencije modela).
+Ali, i N-1 analiza i proračuni operativnih ograničenja sastoje se od promjena osnovnog stanja. 
+- Ispad elemenata (N-1) mijenja topologiju i preraspodjeljuje tokove
+- Priključenje novih elektrana mijenja bilancu, pa netko mora preuzeti njenu snagu
+- Ograničenje proizvodnje elektrane opet mijenja bilancu, ali u suprotnom stanju 
+
+Nakon svake takve promjene, **vanjski sustav se odziva na promjenu** - tokovi na prekograničnim vodovima se mijenjaju, a dio preraspodjele ide kroz susjedne mreže. U modelu koji drži konstantne injekcije P i Q tih promjena ne može imati. Ova sekcija se bavi time što to znači za modele za EOTRP u nekoliko različitih situacija. 
+
+Početno stanje - Model ScA_2029, s referentnim čvorom RHE Velebit. U baznom scenariju gubitci u prijenosnoj mreži iznose 342,9 MW, a proizvodne jedinice RHE Velebit proizvode 179,4 MW. 
+
+### 3.3.2. Ispad prekograničnog voda 
+
+Kada ispadne hrvatska polovica prekograničnog voda, X-sabirnica ostaje bez veze s hrvatskim sustavom. Njezin teret/razmjena time nestaje iz bilance, a razliku preuzima referentno čvorište. 
+
+**Primjer 1:  Ispad prekograničnog voda DV 400 kV Melina - Divača** (X-sabirnica 99986, izvoz 1002,5 MW)
+
+| | Model sa stalnim PQ | Stvarnost (kvalitativno) |
+|---|---|---|
+| izvoz Hrvatske | pada za 1002,5 MW | ostaje isti |
+| promjena snage referentnog čvora (Velebit) | **−1123,4 MW** | — |
+| tokovi na ostalim prekograničnim vodovima | nepromijenjeni (svi unutar 0,5 MW) | preuzimaju 1002,5 MW, većinom vodovi prema Sloveniji i Mađarskoj |
+
+Dakle, u slučaju ispada 400 kV voda kao što je Melina - Divača (što jest naravno ekstreman slučaj, ali kad već se u svim scenarijima modeliraju i ekstremni slučajevi proizvodnje, onda zašto bismo ignorirali ekstreman slučaj u slučaju N-1?), RHE Velebit bi trebao smanjiti snagu sa 179,4 MW na -944 MW kako bi pokrio nastalu razliku.  Razlika između 1002 i 1123 MW je zbog smanjenja gubitaka na zapadnom dijelu prijenosne mreže (S obzirom na visoko opterećenje zapadnog dijela mreže, normalno je da su manji gubitci kad je i manje opterećenje).
