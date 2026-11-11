@@ -1,4 +1,4 @@
-# 1. Mrežni model iz PSS/E
+# 1. Izrada mrežnog modela iz PSS/E
 
 ## 1.1 Polazište
 
@@ -13,17 +13,17 @@ ispravnom tek kad pandapower na istim podacima daje isto rješenje kao PSS/E (§
 
 ## 1.2 Pridruživanje elemenata
 
-| PSS/E zapis | pandapower element | Napomene |
+| PSS/E element | pandapower element | Napomene |
 |---|---|---|
-| Bus | `bus` | indeks = PSS/E broj sabirnice; IDE=4 → `in_service=False`; spremljeni VM/VA u `psse_vm`, `psse_va` |
-| Load | `load` | konstantna snaga; I- i Y-komponente se provjeravaju (u modelima ih nema) |
-| Generator | `sgen` po jedinici + `gen` "Vreg_⟨sabirnica⟩" po PV sabirnici | v. §1.3 |
-| Branch | `line` | π-model, $R$, $X$, $B$ iz zapisa, duljina 1 km |
-| Transformer (K=0) | `trafo` | namotni naponi WINDV kao `vn_hv_kv`/`vn_lv_kv`, PST kut i impedantne tablice (pogl. 2) |
-| Transformer (K≠0) | `trafo3w` | model zvijezde, korekcija impedancije namota 1 (pogl. 2) |
-| Fixed shunt | `shunt` | |
-| Switched shunt | `shunt` | fiksno na BINIT (u modelima `SWSHNT=0`) |
-| Impedance correction | tablica u memoriji | primjenjuje se pri stvaranju modela (pogl. 2) |
+| Bus 					| `bus` | indeks = PSS/E broj sabirnice; IDE=4 → `in_service=False`; spremljeni VM/VA u `psse_vm`, `psse_va` |
+| Load 					| `load` | konstantna snaga; I- i Y-komponente se provjeravaju (u modelima ih nema) |
+| Generator 			| `sgen` po jedinici + `gen` "Vreg_⟨sabirnica⟩" po PV sabirnici | v. §1.3 |
+| Branch | `line` 		| π-model, $R$, $X$, $B$ iz zapisa, duljina 1 km |
+| Transformer (K=0) 	| `trafo` | namotni naponi WINDV kao `vn_hv_kv`/`vn_lv_kv`, PST kut i impedantne tablice (pogl. 2) |
+| Transformer (K≠0) 	| `trafo3w` | model zvijezde, korekcija impedancije namota 1 (pogl. 2) |
+| Fixed shunt 			| `shunt` | |
+| Switched shunt 		| `shunt` | fiksno na BINIT (u modelima `SWSHNT=0`) |
+| Impedance correction 	| tablica u memoriji | primjenjuje se pri stvaranju modela (pogl. 2) |
 
 **Vodovi.** Parametri u p.u. na bazi $S_B$ (SBASE = 100 MVA) i baznom naponu sabirnice
 $U_B$ pretvaraju se u fizikalne vrijednosti:
@@ -56,7 +56,7 @@ gdje je $F$ faktor korekcije impedancije za zadani kut PST-a (pogl. 2), inače $
 
 ## 1.3 Proizvodne jedinice i regulacija napona
 
-Svaka proizvodna jedinica (zapis Generator) postaje **zaseban `sgen`** sa svojom djelatnom
+Svaka proizvodna jedinica (element Generator) postaje **zaseban `sgen`** sa svojom djelatnom
 snagom i poljima vlasnika `psse_o1`…`psse_o4`. Operativna ograničenja određuju po korisniku 
 (Owner 3 = redni broj projekta, Owner 4 = godina zahtjeva za EOTRP) tako da se svi podatci prenose.
 
@@ -72,7 +72,7 @@ rješenja, a granica se provjerava za sabirnicu kao cjelinu.
 **Udaljena regulacija.** pandapower `gen` ne podržava regulaciju udaljene sabirnice. Jedinica
 koja regulira drugu sabirnicu koja već ima vlastitu lokalnu regulaciju modelira se kao PQ
 s jalovom snagom QG iz spremljenog rješenja (u modelu A-2029: jedna jedinica, 80144 'S2' →
-60144). (Ako takvih slučajeva ima u modelu, ispisuju se u rezultantnim datotekama.)
+60144). (U izlaznim datotekama bit će ispisane sve takve jedinice u zasbenom excel sheetu, ako ih ima.)
 
 ### Granice jalove snage
 
