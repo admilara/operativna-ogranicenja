@@ -7,27 +7,17 @@ docs_dir: docs
 theme:
   name: material
   language: hr
-  favicon: assets/favicon.svg
-  font:
-    text: Roboto
-    code: Roboto Mono
   features:
-    - navigation.tabs          # odjeljci (Početna, Teorija, …) kao kartice u zaglavlju
     - navigation.sections
     - navigation.indexes
-    - navigation.footer        # prethodno / sljedeće poglavlje na dnu stranice
-    - toc.integrate            # sadržaj stranice unutar lijeve trake — jedna bočna traka
     - toc.follow
     - content.code.copy
-  # svijetla tema je zadana (bez media upita); tamna ostaje na prekidaču
   palette:
-    - scheme: default
-      primary: custom
-      accent: custom
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       toggle: {icon: material/weather-night, name: Tamna tema}
-    - scheme: slate
-      primary: custom
-      accent: custom
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
       toggle: {icon: material/weather-sunny, name: Svijetla tema}
 
 markdown_extensions:
@@ -45,7 +35,6 @@ extra_css:
 
 extra_javascript:
   - javascripts/mathjax.js
-  - javascripts/brojevi.js
   - https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js
 
 nav:
