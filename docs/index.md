@@ -25,28 +25,17 @@ u PSS/E `.raw` formatu (v35):
 > [!CAUTION]
 > Smjernice i isporučeni modeli imaju nedostatke koji utječu na rezultat — najvažniji je
 > zahtjev za istodobnom naponskom regulacijom i podešavanjem kuta PST-ova s dijagonalnom
-> regulacijom, za koji modeli nemaju podataka. Popis: [Nedostaci smjernica i podataka](nedostaci-smjernica.md).
+> regulacijom, za koji modeli nemaju podataka. Vidi: [Nedostaci smjernica i podataka](nedostaci-smjernica.md).
 
 ## Status
 
 | Dio | Stanje |
 |---|---|
-| Pretvorba PSS/E v35 `.raw` → pandapower | radi; provjereno na modelu scenarija A 2029. (max ΔU 0,00017 p.u., max Δθ 0,025°) |
-| N-1 analiza | u izradi |
+| Pretvorba PSS/E v35 `.raw` → pandapower 							| radi; provjereno na modelu scenarija A 2029. (max ΔU 0,00017 p.u., max Δθ 0,025°) |
+| N-1 analiza 							  							| u izradi |
 | Operativna ograničenja (formula [1], tri varijante uravnoteženja) | u izradi |
-| Prijedlog mjera i energija ograničenja 2029.–2035. | u izradi |
-| Vizualizacija | u izradi |
-
-## Struktura repozitorija
-
-```
-docs/            teorijska knjiga i dokumentacija (ova stranica, GitHub Pages)
-src/oplimits/    Python paket (kod na engleskom)
-scripts/         skripte za pokretanje iz IDLE-a (F5), postavke na vrhu datoteke
-config/          korisničke postavke i nadjačavanja (vodiči, PST tablice, troškovi)
-data/            lokalni modeli i rezultati — NE objavljuju se
-tests/           testovi
-```
+| Prijedlog mjera i energija ograničenja 2029.–2035. 				| u izradi |
+| Vizualizacija 													| u izradi |
 
 ## Podaci
 
