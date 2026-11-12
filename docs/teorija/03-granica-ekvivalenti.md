@@ -17,7 +17,7 @@ koja se zove X-sabirnica (engl. boundary node)
   hrvatska sabirnica          X-sabirnica            sabirnica susjeda
   60032 HERNES11  ────────────  99993 XER_PE12  ────────────  311080 (Pécs)
                   hrvatska polovica              vanjska polovica
-                  (u modelu)                     (zapis postoji, kraj ne postoji)
+                  (u modelu)                     (vod postoji, čvorište ne postoji)
 ```
 
 Ovakva podjela dolazi iz načina na koji ENTSO-E spaja modele - svaki operator modelira 
@@ -25,7 +25,7 @@ svoju mrežu do X-sabirnica na granici, a zajednički model nastaje spajanjem po
 modela na tim X-sabirnicama. Dvije polovice voda imaju R,X,B parametre razmjerne duljini
 svakog dijela. 
 
-### 3.1.2. što imamo, što ne?
+### 3.1.2. Što imamo, što ne?
 
 | Podatak | Zapisan? | Napomena |
 |---|---|---|
@@ -254,9 +254,21 @@ Dakle, u slučaju ispada 400 kV voda kao što je Melina - Divača (što jest nar
 
 Kad ispadne unutarnji vod, X-sabirnice ostaju spojene, a teret na njima ostaje isti. Tok na hrvatskom kraju prekograničnog voda tada se može promijeniti samo za promjenu gubitaka na hrvatskoj polovici voda (do te promjene nema kako doći ako cijelo vrijeme njime ide fiksna P,Q). 
 
-Na 409 ispada unutarnjih vodova (
+Provjera na 409 ispada za scenarij A 2029:
 
+| Ishod ispada | Broj | Promjena razmjene na hrvatskom kraju |
+|---|---:|---|
+| sve X-sabirnice ostaju spojene | 376 | **najviše 1,9 MW** (gubici na hrvatskoj polovici) |
+| neka X-sabirnica ostaje u otoku | 27 | v. §3.3.4 |
+| tok snaga nema rješenja | 6 | v. §3.3.5 |
 
+U stvarnosti dio tokova ide kroz susjedne sustave. Primjer - kad u Slavoniji ispadne vod kojim snaga ide
+prema Mađarskoj, dio tog toka stvarno ide okolo, npr preko Ernestinova u Pecs i preko Žerjavinca u Heviz, a unutar 
+Mađarske između ta dva mjesta. Isto tako se može raspodijeliti na bilokoji drugi 110 kV ili 220 kV dalekovod. 
+Kod nas se to ne može dogoditi jer nemamo konekciju između čvorišta.
+
+Koliko to utječe na rezultate je teško reći, pogotovo jer ovisi o lokaciji ispada, toku koji ide tim 
+vodom i slično. 
 
 ### 3.3.4. Fake otoci u N-1 analizi
 
@@ -279,12 +291,18 @@ Za 6 od 409 ispada unutarnjih vodova ne možemo naći rješenje tokova snaga. (8
 
 | Ispad | Napon | Tok prije ispada [MW] | Opterećenje prije ispada |
 |---|---|---:|---:|
-| 60008–80111 Brinje – `HLJUT 21` | 220 kV | 261,7 | 44 % |
+| 60008–80111 Brinje – VE Ljut 3 | 220 kV | 261,7 | 44 % |
 | 60067–60109 Melina – Senj | 220 kV | 492,3 | 86 % |
-| 60032–80088 Ernestinovo – `HPARNI11` | 400 kV | 409,2 | 30 % |
-| 60150–80088 Žerjavinec – `HPARNI11` | 400 kV | 637,4 | 48 % |
-| 60066–80157 Melina – `HPETHC51` | 400 kV | 1191,6 | 101 % |
-| 60132–80157 Velebit – `HPETHC51` | 400 kV | 1121,0 | 89 % |
+| 60032–80088 Ernestinovo – FNE Končanica | 400 kV | 409,2 | 30 % |
+| 60150–80088 Žerjavinec – FNE Končanica | 400 kV | 637,4 | 48 % |
+| 60066–80157 Melina – PE THC | 400 kV | 1191,6 | 101 % |
+| 60132–80157 Velebit – PE THC | 400 kV | 1121,0 | 89 % |
+
+Kako je već spomenuto u prvom poglavlju, ispadi 400 kV i 220 kV dalekovoda koji
+čine osnovne pravce prijenosa energije na potezima jug-sjever i istok-zapad ne 
+daju konvergirana rješenja. Ispad dionice 400 kV dalekovoda Velebit - Melina, 
+koji su visoko opterećeni i u početnom slučaju, nema rješenje jer jednostavno
+nema puta na 400 kV i 220 kV mreži kojim bi se toliki tokovi mogli zatvoriti.
 
 
 

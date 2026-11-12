@@ -256,3 +256,41 @@ granice za N-1 opisane su u [pogl. 3](03-granica-ekvivalenti.md).
 |---|---|---|
 | `<model>_pp.json` | `scripts/build_model.py` | pandapower mreža (`pp.from_json`), **prije** rješavanja; svi PSS/E podaci potrebni kasnije u stupcima `psse_*` |
 | `<model>_validacija.xlsx` | isto | listovi: `naponi_usporedba` (svaka sabirnica, PSS/E vs pandapower), `neuskladenost_S` (ΔP, ΔQ u spremljenom stanju), `granica_X` (razmjena po X-čvorištu), `nalazi` (popis odstupanja i pretpostavki iz pretvorbe) |
+
+### Dodatak
+
+## 1.9. Mreža 400 kV u modelu ScA 2029.
+
+![Mreža 400 kV u modelu ScA_2029, osnovno stanje](img/mreza_400kV_ScA_2029.svg)
+ 
+*Slika 1.1 — Mreža 400 kV u modelu ScA_2029, osnovno stanje (Shema, položaji nisu geografski. 
+Strelica pokazuje tok radne snage, postotak je strujno opterećenje)
+
+Mreža 400 kV u pogonu u ovom modelu je **jedan lanac**, bez zatvorene petlje 400 kV unutar
+Hrvatske:
+ 
+> Ernestinovo – FNE Končanica – Žerjavinec – Tumbri – Melina – PE THC – RHE Velebit –
+> SE Promina – Konjsko – VE Brda Umovi – Mostar
+
+Prekogranični vodovi priključeni su na čvorove lanca. Petlje se zatvaraju samo kroz mrežu
+220 i 110 kV i kroz susjedne sustave.
+
+Četiri nove elektrane priključene su **ulaz-izlaz** na postojeće vodove 400 kV. Izravni vodovi
+koje zamjenjuju ostali su zapisani u `.raw`-u, ali su isključeni (STAT = 0):
+ 
+| Sabirnica u `.raw`-u | Objekt | Snaga | Napomena | Zamijenjeni izravni vod |
+|---|---|---|---|---|
+| 80157 `HPETHC51` | PE THC | 144 MW | EOTRP 2026, priključak 2029. | Melina – Velebit (178,8 km) |
+| 80088 `HPARNI11` | FNE Končanica | 320 MW (u modelu PG = 240 MW) | EOTRP 2024, priključak 2027. | Ernestinovo – Žerjavinec 2 (231,2 km) |
+| 60240 `HSEPRO11` | SE Promina | 112,5 MW | u pogonu od 2026. | Konjsko – Velebit (100,8 km) |
+| 60245 `HCETIN11` | TS 400 kV za priključak VE Brda Umovi | u modelu VE 89,3 MW | | Konjsko – Mostar (68,6 km do X-sabirnice) |
+
+Sve četiri elektrane u pogonu modelirane su jednako: generator je izravno na sabirnici 400 kV,
+bez blok-transformatora, a granice jalove snage računaju se iz trenutne djelatne snage
+(WMOD = 2, WPF = 0,95: Q = ±0,3287 · PG). U spremljenom rješenju sve su na gornjoj granici
+jalove snage i ne drže zadani napon 1,05 p.u.; najniži je napon na PE THC, 0,962 p.u.
+
+Posljedica topologije: vod **Melina – PE THC – Velebit** jedini je put 400 kV između juga i
+sjevera, a u osnovnom stanju nosi 1121–1192 MW (dionica Melina – PE THC opterećena je 101 %).
+Vod **Ernestinovo – FNE Končanica – Žerjavinec** jedini je unutarnji put 400 kV istok–zapad.
+Ispadi na ta dva voda su među ispadima za koje proračun tokova snaga nema rješenja (pogl. 3, §3.3.5).

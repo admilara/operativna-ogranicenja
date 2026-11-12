@@ -165,20 +165,25 @@ Ni predznak kuta nije preuzet "po definiciji", nego provjeren:
 | Žerjavinec T1 | −3   		 | 416,0 / 375,1 	 | 1,04 / 1,0  | 60151 (220 kV) 						 | isto |
 
 Kako funkcionira modeliranje phase shiftera u PSS/E?
+
 - Jedan od osnovnih parametara je COD1 - **transformer control code** za automatsko prilagođavanje 
 preklopke ili kuta namota transformatora tijekom proračuna tokova snaga. 
+
 	- 0 - nema upravljanja
 	- $\pm1$ - upravljanje naponom
 	- $\pm2$ - upravljanje tokom jalove snage
 	- $\pm3$ - upravljanje tokom radne snage
+	
 - Ako se unese pozitivna vrijednost, automatsko djelovanje regulacije odabranog namota je uključeno kada je
 u postavkama proračuna tokova snaga uključena odgovarajuća opcija
 - Ako se unese negativna vrijednost, automatsko djelovanje je 'nadjačano' postavkama proračuna tokova snaga
 - RMA1/RMI1 su gornja i donja granica, koja se razlikuje ovisno o COD1:
+
 	- Maksimalni i minimalni napon u p.u. kad je COD1=1 ili 2, a CW=1, RMA1=1.1, RMI1=0.9.
 	- Maksimalni i minimalni napon u kV kad je COD1=1 ili 2, a CW=2. Nema default vrijednosti.
 	- Maksimalni i minimalni iznos zakreta kuta kada je COD1=3. Nema default vrijednosti.
 	- Ne koristi se kada je COD1=0
+	
 - VMA1/VMI1 su gornja i donja granica, koja se razlikuje ovisno o COD1:
 	- Iznos napona na reguliranim sabirnicama u p.u. kad je COD1=1. Nema default vrijednosti.
 	- Tok jalove snage u transformator u Mvar kad je COD1=2. Nema default vrijednosti.
