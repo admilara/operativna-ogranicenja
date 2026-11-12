@@ -48,12 +48,12 @@ položaj.
 | 4 | Konjsko T1–T3, Melina T1–T2 400/220 kV | −5,4° … +9,0° | 1 / 0,7667 | 0,8333 |
 
 Tablica 1 opisuje simetrični PST s poprečnom regulacijom: serijska impedancija u nultom položaju
-praktički nestaje, a raste s kutom (pri $\alpha = 9°$, $F = 0{,}0925$). Tablice 2–4 opisuju
+praktički nestaje, a raste s kutom (pri $\alpha = 9°$, $F = 0.0925$). Tablice 2–4 opisuju
 autotransformatore kod kojih se impedancija mijenja umjereno, ali nesimetrično oko nule.
 
 > [!NOTE]
 > Melina i Žerjavinec imaju kut 0°, ali i tablicu — pa se i na njih primjenjuje
-> $F(0°) \approx 0{,}83$. Bez toga je impedancija za 17 % prevelika.
+> $F(0°) \approx 0.83$. Bez toga je impedancija za 17 % prevelika.
 
 ## 2.3 Dvonamotni PST
 
@@ -100,32 +100,32 @@ $S_B = 100$ MVA:
 
 | | $Z$ [p.u., 100 MVA] |
 |---|---|
-| $Z_{12}$ (400–220 kV) | $0{,}00036 + j0.02917$ |
-| $Z_{23}$ (220–30 kV) | $0{,}00234 + j0.03993$ |
-| $Z_{31}$ (30–400 kV) | $0{,}00237 + j\,0{,}13348$ |
+| $Z_{12}$ (400–220 kV) | $0.00036 + j0.02917$ |
+| $Z_{23}$ (220–30 kV) | $0.00234 + j0.03993$ |
+| $Z_{31}$ (30–400 kV) | $0.00237 + j\,0.13348$ |
 
 **Korak 2 — zvijezda.**
 
 | | $Z$ [p.u., 100 MVA] |
 |---|---|
-| $Z_1$ | $0{,}00020 + j\,0{,}06136$ |
-| $Z_2$ | $0{,}00016 - j\,0{,}03219$ |
-| $Z_3$ | $0{,}00217 + j\,0{,}07212$ |
+| $Z_1$ | $0.00020 + j\,0.06136$ |
+| $Z_2$ | $0.00016 - j\,0.03219$ |
+| $Z_3$ | $0.00217 + j\,0.07212$ |
 
 Negativna reaktancija $Z_2$ posljedica je zajedničkog namota kod autotransformatora, ne radi se o grešci u podacima.
 
-**Korak 3 — faktor.** Kut 5,5° leži između točaka tablice 4,91° ($F = 0{,}7944$) i 5,70°
-($F = 0{,}7889$):
+**Korak 3 — faktor.** Kut 5,5° leži između točaka tablice 4,91° ($F = 0.7944$) i 5,70°
+($F = 0.7889$):
 
-$$F(5{,}5°) = 0{,}7944 + (0{,}7889 - 0{,}7944)\,\frac{5{,}5 - 4{,}91}{5{,}70 - 4{,}91} = 0{,}79029.$$
+$$F(5.5°) = 0.7944 + (0.7889 - 0.7944)\,\frac{5.5 - 4.91}{5.70 - 4.91} = 0.79029.$$
 
 **Korak 4 — natrag u parove.**
 
 | | Nazivno ($F=1$) | Korigirano | Promjena |
 |---|---|---|---|
-| $Z_{12}$ | $0{,}00036 + j\,0{,}02917$ | $0{,}00032 + j\,0{,}01631$ | **−44 %** |
-| $Z_{31}$ | $0{,}00237 + j\,0{,}13348$ | $0{,}00233 + j\,0{,}12061$ | −9,6 % |
-| $Z_{23}$ | $0{,}00234 + j\,0{,}03993$ | nepromijenjeno | 0 |
+| $Z_{12}$ | $0.00036 + j\,0.02917$ | $0.00032 + j\,0.01631$ | **−44 %** |
+| $Z_{31}$ | $0.00237 + j\,0.13348$ | $0.00233 + j\,0.12061$ | −9,6 % |
+| $Z_{23}$ | $0.00234 + j\,0.03993$ | nepromijenjeno | 0 |
 
 Smanjenje $Z_1$ za 21 % daje smanjenje impedancije 400–220 kV za 44 %, jer je
 $Z_{12} = Z_1 + Z_2$, a $Z_2$ je negativna. Zbog toga pogrešno postavljena korekcija ima
