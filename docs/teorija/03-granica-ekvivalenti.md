@@ -304,6 +304,138 @@ daju konvergirana rješenja. Ispad dionice 400 kV dalekovoda Velebit - Melina,
 koji su visoko opterećeni i u početnom slučaju, nema rješenje jer jednostavno
 nema puta na 400 kV i 220 kV mreži kojim bi se toliki tokovi mogli zatvoriti.
 
+Tokovi snaga su provedeni s nekoliko različitih opcija za slučajeve ovih ispada:
+
+| Pokušaj | Ishod |
+|---|---|
+| Newton-Raphson bez Q-granica (svi regulatori PV) | 4 slučaja konvergiraju, ali uz nemoguću jalovu snagu (npr. oko 4400 Mvar na regulatoru 110 kV sabirnice 60031 `HELTO 51`); Melina/Velebit – 80157 ne konvergiraju ni tako |
+| VARLIM s početkom iz osnovnog stanja (PV/PQ stanje i naponi osnovnog slučaja) | ne konvergira ni jedan |
+| VARLIM s Iwamotovim Newton-Raphsonom (prigušeni korak) | ne konvergira ni jedan |
+| smanjenje izvoza (svi tereti na X-sabirnicama × λ, proizvodnja smanjena razmjerno) | konvergira tek ispod određenog izvoza — v. dolje |
+
+Rješenje postoji samo kada se zanemare granice jalove snage ili kada se smanji prijenos, što je 
+obilježje prekoračenja prijenosne moći dalekovoda (a i naponske nestabilnosti) - sa stvarnim
+granicama Q i ostalim elementima u mreži nije moguće prenijeti zadanu snagu s juga na sjever ili istoka na zapad.
+
+**Uloga granica prijenosnog sustava** - isti problematični ispadi proračunati su na 
+još dva načina: 
+
+1. **Smanjeni izvoz** - granica ostaje stalna PQ injekcija, ali se svi tereti na X-čvorištima
+pomnože faktorom $\lambda<1$, a proizvodnja u Hrvatskoj se smanji za isti iznos (skaliranjem). Traži se 
+najveći $\lambda$ uz koji ispad ima rješenje.
+2. **Kruta mreža na X-sabirnicama** - na **svakoj** od 35 X-sabirnica s razmjenom teret se uklanja, a na 
+njegovo mjesto se stavlja `ext_grid` s modulom i kutom napona iz spremljenog rješenja. Velebit ostaje slack bus, 
+pa model zapravo ima 36 krutih izvora. U osnovnom stanju to daje isto rješenje kao spremljene PQ injekcije.
+
+| Ispad | Najveći izvoz uz stalne PQ injekcije | Kruta mreža na X-sabirnicama (§3.2.4) |
+|---|---|---|
+| Brinje – VE Ljut 3 | 3600 MW (99 % osnovnog) | rješenje; ukupni izvoz 3588 MW |
+| Melina – Senj | 3515 MW (97 %) | rješenje; ukupni izvoz 3588 MW |
+| Ernestinovo – FNE Končanica | 3061 MW (84 %) | rješenje; ukupni izvoz 3643 MW |
+| Žerjavinec – FNE Končanica | 2182 MW (60 %) | rješenje; ukupni izvoz 3643 MW |
+| Melina – PE THC | nema rješenja ni bez izvoza | rješenje, ali izvoz pada na 2449 MW, a Velebit na −1259 MW |
+| Velebit – PE THC | 28 MW (≈ 0 %) | rješenje, ali izvoz pada na 2591 MW, a Velebit na −1115 MW |
+
+**Kako kruta mreža preraspodjeljuje tokove?** 
+
+Uz stalnu PQ injekciju zadana je snaga na X-čvorištima, a napon i kut se mijenjaju. Uz krutu mrežu je
+obrnuto, zadani su napon i kut, a snaga na X-sabirnici je rezultat proračuna. Tok hrvatskom polovicom 
+prekograničnog voda je približno:
+
+$$
+P \approx \frac{U_H U_X}{x}\sin{\theta_H-\theta_X}
+$$
+
+gdje je $\theta_X$ nepromjenjiv. Kad nakon ispada kut hrvatske sabirnice $\theta_H$ poraste ili padne, tok
+na tom vodu raste ili pada. Nitko tu raspodjelu ne zadaje, ona slijedi iz toga kako se nakon ispada pomaknu
+kutovi napona na sabirnicama. 
+
+Ukupni izvoz pri tom **nije niti zadan niti sačuvan**. Za prva četiri ispada iz tablice gore ukupni izvoz se
+promijenio za manje od 40 MW jer su se ta povećanja i smanjenja na različitim vodovima uglavnom poništila. S 
+druge strane, za slučaj ispada Velebit - Melina, ukupni izvoz pada za više od 1 GW! Ali, promijenila se i 
+raspodjela po vodovima i to je dovoljno da imamo rješenje koje konvergira.
+
+Kod ispada u slavonskom koridoru preraspodjela je ona o kojoj smo razgovarali u teoriji - kad je put 
+Ernestinovo - Žerjavinec prekinut, kut u Ernestinovu raste, a u Žerjavincu pada, pa izvoz prema Pecsu
+raste (ukupno +214 MW na oba voda), a izvoz prema Hevizu pada (-105 MW). Ostatak se raspodijeli na ostale
+prekogranične vodove. U stvarnosti taj tok ide kroz mađarsku mrežu od Pecsa do Heviza (iako mi nemamo 
+modeliranu mrežu između njih).
+
+Zaključak za ova četiri ispada: uz stalne PQ injekcije svaki prekogranični vod mora i dalje nositi točno svoju razmjenu, pa sav tranzit mora proći preostalim hrvatskim elementima. Uz vanjski sustav koji može preraspodijeliti tokove (ovdje u krajnjem obliku krute mreže) rješenje postoji. Koliko je točno preraspodjela stvarna, ne može se reći bez vanjske mreže — kruta mreža je druga krajnost i vjerojatno griješi u preraspodjeli (bilo u iznosu, bilo u omjerima). 
+
+Ispadi voda Velebit – Melina (obje dionice preko 80157 PE THC) su drukčiji. Ni uz izvoz smanjen na nulu nema rješenja, a kruta mreža daje rješenje samo tako da izvoz padne za više od 1 GW i da Velebit preuzme isto toliko, što nije legitimno
+rješenje.
+
+> [!WARNING] 
+> Ispad bez rješenja nije ispad bez posljedica. 
+> Kako tretirati ovakve slučajeve u samim analizama? Za proračun operativnih ograničenja ovakav slučaj bi trebao biti 
+> dosta kritičan, ali s druge strane, trenutne analize nam govore da puno toga ovisi o modeliranju granice. 
+> Pitanje i na koji način primijeniti Formulu [1] iz Smjernica na takve slučajeve, kad nema opterećenja iz kojeg bi se 
+> računao faktor. 
+
+> [!NOTE] 
+> S kutovima PST-ova odabranima prema Smjernicama (najmanji broj preopterećenja 400/220 kV u osnovnom stanju) rješenja 
+> nemaju i ispadi 400 kV Melina – Tumbri i Tumbri – Žerjavinec, ukupno 8. Ako bi se uzeo neki drugi kriterij za postavljanje kuteva PST-a, bi li se dobio bolji rezultat? [Ovaj dio je procesu planiranja i izrade]
+
+### 3.3.6. Napon na granici
+
+U modelu sa stalnim PQ injekcijama jalova snaga na X-sabirnici je stalna, pa promjena napona X-sabirnice ovisi
+samo o hrvatskoj mreži tj. promjenama unutar nje. U stvarnosti vanjska mreža ima svoju naponsku potporu u vidu 
+generatora i FACTS uređaja. Tehnički bi vanjski sustav trebao i dalje podupirati napon na granici kada se dogodi 
+nešto što u Hrvatskom sustavu uzrokuje pad napona. 
+
+Model sa stalnim PQ tako ima problema i naponske prirode:
+
+- **precjenjuje promjene napona** na graničnim sabirnicama nakon ispada (u pravilu simulacijski napon 
+padne više nego što bi se u stvarnosti desilo).
+- **precjenjuje iznose jalove snage** koju moraju dati hrvatski generatori kako bi održali napon unutar granica.
+
+To utječe i na strujna opterećenja, a samim time i na operativna ograničenja. Opterećenje se računa iz struje, a struja ovisi o jalovoj snazi i naponu:
+
+$$
+I = \frac{\sqrt{P^2 + Q^2}}{\sqrt{3}U}
+$$
+
+Postoje dva puta:
+
+- **veći tok jalove snage** - ako jalovu snagu koju je dao susjedni sustav moraju dati sad hrvatski 
+generatori, ona teče unutarnjim vodovima i povećava tok jalove po njima
+- **niži naponi** - za istu prividnu snagu niži napon znači veću struju
+
+### 3.3.7. Uravnoteženje novih proizvodnih jedinica
+
+Kad se priključi nova elektrana ili se ograniči njena snaga, razliku mora netko preuzeti. Kasnija poglavlja ove 
+dokumentacije opisuju varijante gdje to preuzima RHE Velebit (V1), upravljive elektrane u Hrvatskoj (V2) ili razmjene sa susjednim sustavima (V3). 
+
+### 3.3.8. Zaključak
+
+
+| Situacija | Model sa stalnim PQ | Posljedica |
+|---|---|---|
+| ispad prekograničnog voda | razmjena nestaje, preuzima Velebit | nevaljan slučaj; isključen iz N-1 |
+| ispad unutarnjeg voda | razmjene nepromijenjene (≤ 1,9 MW) | preraspodjela samo kroz Hrvatsku; pogreška nepoznata, smjer nije zajamčen |
+| ispad koji odvaja dio mreže spojen sa susjedom | otok ispada iz proračuna | nevaljan slučaj; zastavica G4 |
+| ispad u opterećenom koridoru | nema rješenja toka snaga | rezultat izostaje; ne smije se ispustiti iz izvještaja |
+| napon na granici | bez potpore izvana | promjene napona precijenjene; veća struja (više Q, niži napon) uz granicu |
+| uravnoteženje V3 | raspodjela po X-sabirnicama proizvoljna | rezultat ovisi o pretpostavci |
+
+
+## 3.4. Što mora imati dobar prikaz vanjskog sustava?
+
+### 3.4.1. Posljedice i zahtjevi
+
+U prethodnoj sekciji sagledali smo što se događa kad vanjski sustav nema ništa. U zaključku je dan popis
+posljedica takvog pristupa i svaka od navedenih posljedica ukazuje što bi dobar ekvivalent zapravo trebao imati.
+
+| Posljedica (§3.3) | Što bi se u stvarnosti dogodilo | Što prikaz vanjskog sustava za to treba |
+|---|---|---|
+| ispad prekograničnog voda: razmjena nestaje, preuzima je Velebit | razmjena prelazi na ostale prekogranične vodove, ukupna ostaje ista | putove između X-sabirnica kroz susjedne mreže; ukupna razmjena nepromijenjena |
+| ispad unutarnjeg voda: razmjene zamrznute | dio preraspodjele ide kroz susjede | tok prekograničnog voda mora ovisiti o naponima i kutovima na granici |
+| otoci koji u stvarnosti nisu otoci | dio mreže ostaje napajan preko susjeda | X-sabirnice moraju biti povezane i izvan Hrvatske |
+| ispadi bez rješenja | tokovi se preraspodijele po prekograničnim vodovima | isto kao gore: putovi kroz susjede |
+| napon na granici bez potpore | susjedni generatori daju jalovu snagu | izvori jalove snage iza X-sabirnica |
+| uravnoteženje V3 proizvoljno | promjenu bilance preuzimaju elektrane u susjedstvu, prema mreži i dispečingu | izvori djelatne snage s fizikalnom raspodjelom (GSK) |
+
 
 
 
